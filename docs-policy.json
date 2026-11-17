@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "description": "跨仓文档分层；PLAN 强制 implementation_status；AI/shared 文档限制行数。",
+  "include": [
+    "*.md",
+    "**/*.md"
+  ],
+  "defaults": {
+    "audience": "shared",
+    "status": "current"
+  },
+  "rules": [
+    {
+      "glob": "README.md",
+      "audience": "shared",
+      "status": "current"
+    },
+    {
+      "glob": "plans/**",
+      "audience": "human",
+      "status": "current"
+    },
+    {
+      "glob": "guides/**",
+      "audience": "shared",
+      "status": "current"
+    },
+    {
+      "glob": "reference/**",
+      "audience": "shared",
+      "status": "current"
+    },
+    {
+      "glob": "decisions/**",
+      "audience": "shared",
+      "status": "current"
+    },
+    {
+      "glob": "archive/**",
+      "audience": "human",
+      "status": "archived"
+    },
+    {
+      "glob": "subscribeWatch/**",
+      "audience": "human",
+      "status": "current"
+    }
+  ],
+  "plan_status": {
+    "glob": [
+      "plans/PLAN-*.md"
+    ],
+    "allowed": [
+      "not_started",
+      "in_progress",
+      "fixing",
+      "blocked",
+      "done",
+      "rolled_back"
+    ]
+  },
+  "line_limits": {
+    "ai": 120,
+    "shared": 200
+  },
+  "legacy_over_limit": [],
+  "required_reading": []
+}
