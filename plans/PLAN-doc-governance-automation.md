@@ -1,7 +1,7 @@
 ---
 audience: human
 status: current
-implementation_status: not_started
+implementation_status: done
 ---
 
 # 计划：文档规范自动化巡检与 DSH/SA 同步
