@@ -3,6 +3,9 @@ audience: human
 status: current
 implementation_status: done
 ---
+
+> 推送策略已被 [`PLAN-repo-governance.md`](PLAN-repo-governance.md) 取代；本计划其余内容仍有效。
+
 # PLAN: 跨仓工作区授权
 - 日期：2026-11-17
 

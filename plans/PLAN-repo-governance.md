@@ -1,7 +1,7 @@
 ---
 audience: human
 status: current
-implementation_status: not_started
+implementation_status: in_progress
 ---
 # PLAN: SA/dsh 仓库治理与 dsh-superagent 迁移
 - 日期：2026-11-17
