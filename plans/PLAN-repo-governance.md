@@ -1,7 +1,7 @@
 ---
 audience: human
 status: current
-implementation_status: blocked
+implementation_status: done
 ---
 # PLAN: SA/dsh 仓库治理与 dsh-superagent 迁移
 - 日期：2026-11-17
