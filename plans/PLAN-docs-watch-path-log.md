@@ -1,7 +1,7 @@
 ---
 audience: human
 status: current
-implementation_status: not_started
+implementation_status: done
 ---
 
 # PLAN：文档巡检路径显示优化
