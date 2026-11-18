@@ -177,7 +177,7 @@ T / (T − R) = 0.8 / (0.8 − 0.16) ≈ 1.25
 
 DSH 原生 `compaction-basic` 只在会话日志里写 `compaction/summary` checkpoint，
 不会生成项目目录里的 `STATUS.md`。新增本机插件
-[`task/dsh-context-guard/`](../../personalCloud/task/dsh-context-guard/README.md)：
+[`dsh-context-guard/`](../../dsh-context-guard/README.md)：
 
 - 监听 `compaction/start`：先写压缩前的标题、工作目录、最近用户意图、最近工具调用；
 - 监听 `compaction/summary`：把 DSH 自己生成的结构化摘要追加进同一份 `STATUS.md`，

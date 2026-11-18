@@ -17,7 +17,7 @@ implementation_status: done
 - 跨仓检查入口：`personalCloud/workspace/scripts/check.sh`
 - 每日巡检与飞书通知：新增 `personalCloud/workspace/scripts/docs-watch.sh`
 - 定时器安装：新增 `personalCloud/workspace/scripts/install-doc-watch.sh` 与 `personalCloud/workspace/systemd/dsh-docs-watch.{service,timer}`
-- 提交前门禁：`personalCloud/task/dsh-context-guard/lib/doc-guard.js`、`index.js`、`test.mjs`
+- 提交前门禁：`dsh-context-guard/lib/doc-guard.js`、`index.js`、`test.mjs`
 - 规则同步：根 `AGENTS.md`、`personalCloud/workspace/_meta/doc/task-workflow.md`、`dshSuperagentRepo/AGENTS.md`、`dshSuperagentRepo/doc/task-workflow.md`
 - SA 提示词：`dsh-superagent/prompts/shared.md`、`dsh-superagent/prompts/work.md`
 - 不改文档检查算法，不改 `legacy_over_limit` 名单。

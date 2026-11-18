@@ -15,9 +15,9 @@ status: current
 
 | 插件 | 类型 | 本机目录 | 状态 | 发布入口 |
 |---|---|---|---|---|
-| `dsh-workbench`（交付台） | Host + Client UI bundle | [`task/dsh-workbench/`](../../personalCloud/task/dsh-workbench/README.md) | 开发/切换中；npm `dsh-workbench@0.2.x` | GitHub `person-clouds/dsh-workbench`；见 [PUBLISHING](../../personalCloud/task/dsh-workbench/PUBLISHING.md) |
-| `dsh-context-guard`（原名 `dsh-compaction-archive`） | Host bundle + Web client | [`task/dsh-context-guard/`](../../personalCloud/task/dsh-context-guard/README.md) | 代码完成（风险 `ask`、单轮调用/输出门禁、硬上限自动继续、命令形态 deny/ask 与系统提示）；npm 目标版本 `@fenghoer/dsh-context-guard@0.4.1`；中文 README + 英文 `README.en.md`；待宿主机安装、迁移 profile 与 Web 实机验收 | [STATUS](../../personalCloud/task/dsh-context-guard/STATUS.md) / [PLAN](../../personalCloud/task/dsh-context-guard/PLAN.md) / [PUBLISHING](../../personalCloud/task/dsh-context-guard/PUBLISHING.md) / market PR #15266 |
-| `dsh-workflow-shortcuts` | Client UI bundle（Host 空插件） | [`task/dsh-workflow-shortcuts/`](../../personalCloud/task/dsh-workflow-shortcuts/README.md) | 本地测试 3/3 通过；npm `dsh-workflow-shortcuts@0.1.0` 与 GitHub Release `v0.1.0` 已发布；待宿主机安装验收 | [PUBLISHING](../../personalCloud/task/dsh-workflow-shortcuts/PUBLISHING.md)；awesome-dsh-plugin PR #15389 |
+| `dsh-workbench`（交付台） | Host + Client UI bundle | [`dsh-workbench/`](../../dsh-workbench/README.md) | 开发/切换中；npm `dsh-workbench@0.2.x` | GitHub `person-clouds/dsh-workbench`；见 [PUBLISHING](../../dsh-workbench/PUBLISHING.md) |
+| `dsh-context-guard`（原名 `dsh-compaction-archive`） | Host bundle + Web client | [`dsh-context-guard/`](../../dsh-context-guard/README.md) | 代码完成（风险 `ask`、单轮调用/输出门禁、硬上限自动继续、命令形态 deny/ask 与系统提示）；npm 目标版本 `@fenghoer/dsh-context-guard@0.4.1`；中文 README + 英文 `README.en.md`；待宿主机安装、迁移 profile 与 Web 实机验收 | [STATUS](../../dsh-context-guard/STATUS.md) / [PLAN](../../dsh-context-guard/PLAN.md) / [PUBLISHING](../../dsh-context-guard/PUBLISHING.md) / market PR #15266 |
+| `dsh-workflow-shortcuts` | Client UI bundle（Host 空插件） | [`dsh-workflow-shortcuts/`](../../dsh-workflow-shortcuts/README.md) | 本地测试 3/3 通过；npm `dsh-workflow-shortcuts@0.1.0` 与 GitHub Release `v0.1.0` 已发布；待宿主机安装验收 | [PUBLISHING](../../dsh-workflow-shortcuts/PUBLISHING.md)；awesome-dsh-plugin PR #15389 |
 
 ### 1.2 DSH MCP 工具
 
@@ -95,5 +95,5 @@ tarball: https://github.com/<owner>/<repo>/releases/latest/download/<pkg>.tgz
 - DSH 部署与运维：[`ubuntuInit/docs/dsh.md`](../../personalCloud/ubuntuInit/docs/dsh.md)
 - 上下文压缩依据与调参：[`reference/dsh-context-compaction.md`](dsh-context-compaction.md)
 - MCP 吃 token 的管控：[`task/mcp-control/README.md`](../../personalCloud/task/mcp-control/README.md)
-- 交付台发布记录：[`task/dsh-workbench/PUBLISHING.md`](../../personalCloud/task/dsh-workbench/PUBLISHING.md)
-- 上下文守卫方案与发布：[`task/dsh-context-guard/PLAN.md`](../../personalCloud/task/dsh-context-guard/PLAN.md)、[`PUBLISHING.md`](../../personalCloud/task/dsh-context-guard/PUBLISHING.md)
+- 交付台发布记录：[`dsh-workbench/PUBLISHING.md`](../../dsh-workbench/PUBLISHING.md)
+- 上下文守卫方案与发布：[`dsh-context-guard/PLAN.md`](../../dsh-context-guard/PLAN.md)、[`PUBLISHING.md`](../../dsh-context-guard/PUBLISHING.md)
