@@ -1,14 +1,7 @@
----
-audience: shared
-status: current
-owner: workspace
-scope: /home/zh/www
----
-
 # 工程规则（spec）
 
 - 适用范围：`/home/zh/www` 内所有代码、脚本、配置和数据结构改动。
-- 相关：[`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md)、[`go-scaffold-guide.md`](../guides/go-scaffold-guide.md)
+- 相关：[`operations-safety.md`](operations-safety.md)、[`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md)
 
 ## 1. 不编造
 
@@ -35,8 +28,7 @@ scope: /home/zh/www
 
 脚本和部署操作应可重复执行，不产生副作用。
 
-- 重装软件前先检查是否已安装。
-- 建文件前先判断是否存在。
+- 重装软件前先检查是否已安装；建文件前先判断是否存在。
 - 配置变更用 diff 或覆盖，不追加重复项。
 
 ## 5. 渐进交付
@@ -51,14 +43,27 @@ scope: /home/zh/www
 
 创建新 Go 项目时，优先基于私有 GoFrame 脚手架初始化，不从零搭骨架：
 
-- 仓库：`https://gitee.com/fenghoer/gf-scaffold`（私有，本地已配置拉取权限）
+- 仓库：`https://gitee.com/fenghoer/gf-scaffold`（私有，本地已配置拉取权限）。
 - 为新项目生成 README、任务文档时，必须保留本条要求。
 - 脚手架不满足需求时，先评估能否在脚手架基础上扩展，再考虑新建结构。
-- 选型、仓库归属、目录规范详见 [`go-scaffold-guide.md`](../guides/go-scaffold-guide.md)。
+- 部署：有对外监听端口用容器 + compose；只有 cron/worker 用宿主机 + `run.sh` + systemd user。不确定先宿主机，对外暴露时再迁容器。
+- 项目放在 `task/<项目>/workspace/`（已被 `.gitignore` 屏蔽）；`cloudctl` 管服务生命周期，`run.sh` 管项目环境与业务命令，Makefile 管项目内构建；三者不重复。
+- 模板通用代码回流当前只用「手动 cherry-pick 到 gf-scaffold」，不建 subtree/自动 rebase。
 
-## 7. 数据存储
+## 7. 接口与列表
 
-项目相关结构化数据统一使用**宿主机 MySQL**（`127.0.0.1:3306`），不默认使用 `nextcloud-db` 容器内的 MariaDB。
+接口路径、字段、筛选或分页语义变化，以及缓存、并发、批处理、超时、降级等性能方案，先给方案和证据，得到确认再改。禁止“先改一版试试看”。
+
+- 所有持续增长的列表必须服务端分页；至少 `offset`/`limit`，返回 `total`、`hasMore` 或等价游标；默认页大小 10–50，并限制 `limit` 上限。禁止前端先拉全量再 `slice`。
+- 列表默认只展示未归档数据；查看归档/全部必须显式传参并有清晰切换入口。
+- 默认按时间倒序，并以稳定唯一键做次级排序；排序字段和方向白名单校验，非法参数回退默认。翻页/筛选/排序状态应可保留。
+- 分组/父子列表默认折叠，只展示每层最近若干项；展开、翻页、查看全部明确区分。
+- 列表只加载当前页数据；不在列表请求中逐条网络请求、回放日志或执行昂贵 git 操作；慢操作走缓存或异步任务。
+- 排查时先黑盒取证（错误、环境、请求、服务状态、最近变更），按概率排序；结论必须对应具体证据，无证据只能写“推测”。
+
+## 8. 数据存储
+
+项目结构化数据统一使用**宿主机 MySQL**（`127.0.0.1:3306`），不默认使用 `nextcloud-db` 容器内的 MariaDB。
 
 - **MySQL**：新项目/子任务建独立 database + 独立 user，只授权本库；禁止复用其他项目的库/账号。
 - **Redis**：可复用 `nextcloud-redis` 容器，但须用独立 DB 编号并在项目文档登记，禁止共用 DB。当前分配：`db0` Nextcloud、`db1` content-discovery。
@@ -67,12 +72,26 @@ scope: /home/zh/www
 - **密钥**：数据库密码放各任务 `.env`（权限 600，已被 `.gitignore` 忽略），不写进代码/文档/命令历史。
 - **连接方式**：宿主机进程用 `127.0.0.1:3306`；容器访问宿主机 MySQL 时优先只读挂载 `/run/mysqld/mysqld.sock` 走 socket，不把 3306 暴露到容器网络或公网。
 
+## 9. DSH 插件
+
+新插件统一放 `task/dsh-<name>/`，最低包含 `package.json`、`cordis.patch.yml`、`index.js`、`README.md`、`PUBLISHING.md`、`STATUS.md`、`LICENSE`、`market/<owner>__<repo>.yml`、`test.mjs`；客户端插件再加 `client.js`。硬性要求：
+
+1. `package.json` 必须有 `dsh.bundle.patch`；客户端插件必须有 `dsh.client`，且 `client.js` 能被普通脚本加载（`new vm.Script(...)` 校验）。
+2. 默认路径不能写死本机个人目录，必须可由配置或 `DSH_HOME` 覆盖。
+3. 不注册独立公网端口；优先复用 DSH Web 的鉴权与 Host/Origin 校验。
+4. 只读优先；写文件限定到明确的 `DSH_HOME` 子目录，并说明失败不影响主流程。
+5. 发布前跑 `npm pack --dry-run` / `npm test`，同步 `PROJECT_INDEX.md` 与插件清单。
+6. 发布基线：`npm pack` 生成 `.tgz` 上传 GitHub Release → `npm publish --access public` → GitHub 加 topic `dsh-plugin` → 仓库满 1 天后向 `awesome-dsh-plugin` 提交 `data/plugins/<owner>__<repo>.yml`（含 `url`、`name`、`category`、中英 `description`，有 tarball 则写）。
+7. 插件清单归 `PROJECT_INDEX.md` 与 `repos.yaml`；本文件只保留发布最低规则。
+
 ## 验收方式
 
 - 改动用 `git diff` 自检：只包含本任务内容，无顺手重构、无伪造来源。
 - 新增脚本连续执行两次结果一致（幂等）；新项目能说明脚手架来源与扩展点。
 - 数据库改动只能在新建的独立库/账号上验证，不触碰生产依赖容器。
+- 列表接口有分页、默认过滤、稳定排序和明确上限；性能方案有用户确认记录。
+- DSH 插件在隔离环境完成 `npm pack --dry-run` / `npm test`，发布步骤与仓库清单已同步。
 
 ## 失效条件
 
-- 工作区根、私有脚手架仓库或数据库拓扑变更时，本节需同步修订；已废弃的规则随一次 PR 删除，不保留“历史说明”。
+- 工作区根、私有脚手架仓库、数据库拓扑或 DSH 市场流程变更时同步修订；已废弃规则随一次提交删除，不保留“历史说明”。
