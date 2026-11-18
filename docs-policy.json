@@ -16,6 +16,11 @@
       "status": "current"
     },
     {
+      "glob": "specs/**",
+      "audience": "shared",
+      "status": "current"
+    },
+    {
       "glob": "plans/**",
       "audience": "human",
       "status": "current"
