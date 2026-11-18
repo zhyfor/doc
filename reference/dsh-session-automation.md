@@ -71,3 +71,28 @@ rm -f "$C"
 | cookie 文件被清理 | API 返回 `401 unauthorized` | 重新用启动 token 换 cookie |
 | token 来自旧进程 | `401` | 取 journal 中最新一条 `dsh web:` |
 | 请求体少 `args` 层 | `Remote payload must contain exactly one plain-object args field` | 包成 `payload.args.request` |
+
+## 5. 修改 DSH 设置并验证
+
+DSH 的 settings 由 `settingsController` 管理，写入会落到当前 profile 的 Cordis patch。不要在 `workspace-write` 会话里直接改 `~/.dsh`（会被沙箱判为只读），也不要把仓库复制到 `/tmp`。
+
+```bash
+# 先看所有 namespace（settings/describe 没有 ns 参数）
+curl -sS -b "$C" -H 'Content-Type: application/json' \
+  -X POST "$API/settings/describe" \
+  --data '{"type":"client-request","rpcId":"desc","method":"settings/describe","payload":{"args":{}}}'
+
+# 合并写入一个 namespace 的 user section
+curl -sS -b "$C" -H 'Content-Type: application/json' \
+  -X POST "$API/settings/update" \
+  --data '{"type":"client-request","rpcId":"upd","method":"settings/update","payload":{"args":{"ns":"bash-sandbox","patch":{"timeoutMs":60000}}}}'
+```
+
+验证配置改动不要拿交付会话反复试：新建一个临时会话（`workspaceId` 必填），直接读会话日志前几条事件，再归档。
+
+```bash
+D="$HOME/.dsh/sessions/<workspace-encoded>/<session-id>"
+zstd -dc "$D/session.v4.jsonl.zstd" | grep -E 'permission/preset|sandbox/mode|approval/policy' | head -5
+```
+
+确认事件符合预期后调用 `workspace/archiveSession`（`stopActivity: true`）归档验证会话。
