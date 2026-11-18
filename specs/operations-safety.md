@@ -36,10 +36,13 @@ Funnel 会把服务发布到公网，必须同时满足：
 | 权限不足 | 输出为空、全 0 或只有 4K | 用 `id` 确认；需要 root 的项写成「无法确认」 |
 | UID 映射 | 宿主侧属主 `nobody:nogroup`、大小偏小 | 容器数据从容器内查，宿主侧视图不可信 |
 | 工具沙箱 namespace | 工具内 `/mnt` 只读、路径不同或不存在 | 不代表宿主机状态，以用户在宿主 shell 的操作为准 |
+| DSH 工具沙箱 | 会话 cwd 内可写；父目录、`~/.dsh`、其他仓在工具内报“只读文件系统” | `workspace-write` 写根边界，不是宿主挂载；改用 DSH settings/API 或交用户执行 |
 
 常见误判：`du` 全是 4K 是容器目录普通用户读不到；`ufw status` 报错是只有 root 能运行；`mysql -uroot` 失败是 root 走 `auth_socket`；`command -v ufw` 找不到是 PATH 缺 `/usr/sbin`。结论前交叉验证 `du`、`df`、容器内 `du`；权限不足时区分【已确认】与【未能确认（原因）】。
 
 工具视图复核顺序：`id` → 命令跑在工具沙箱还是宿主 shell → 数字对不上换容器内/宿主视角 → 仍不可确认就输出可在宿主机执行的命令清单。工具内 `findmnt` 显示 `ro` + `test -w` 失败，不能推出宿主机只读，更不能建议 `sudo mount -o remount,rw`。
+
+DSH 场景先读会话头的 `permission/preset`、`sandbox/mode`、`approval/policy` 和 `header.cwd`。`workspace-write` 的写根是会话 cwd（`dsh-sandbox-policy` 的 `resolveWorkspaceRoot(session.header.cwd)`），父仓库 `.git`、`~/.dsh` 必然在界外。写 `~/.dsh` 配置被拒时不要 `cp`/`chmod`/remount，也不要把仓库复制到 `/tmp`；用 DSH `settings/update` API（见 [`dsh-session-automation.md`](../reference/dsh-session-automation.md)）或让用户在宿主终端执行。
 
 `ubuntuInit/12-verify.sh` 的降级基线：
 
@@ -63,6 +66,7 @@ sudo -n true 2>/dev/null || echo "sudo 不可用或需要密码"
 ```
 
 - 目录属主是当前用户，不等于可写；`ro` 挂载即使属主正确也不能写。
+- DSH 会话内 `test -w` 只证明当前 cwd 内可写，不能证明父目录、`~/.dsh` 或其他仓库可写。
 - 只读挂载、无写权限或需 `sudo` 时，明说「当前无写权限」，生成脚本交用户执行。
 - 批量移动前用 `rsync --dry-run` 或打印清单；移动用 `mv -n`。
 - 删除前先列清单；默认移入隔离目录，只有用户明确要求永久删除时才 `rm`。
