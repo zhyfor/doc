@@ -1,19 +1,12 @@
----
-audience: shared
-status: current
-owner: workspace
-scope: /home/zh/www
----
-
 # 运行安全与操作规范（spec）
 
 - 适用范围：涉及宿主机、权限、磁盘、服务重启、长任务、测试和临时浏览器的操作。
-- 相关：[`host-permissions.md`](host-permissions.md)、[`troubleshooting-playbook.md`](../guides/troubleshooting-playbook.md)、[`SECURITY.md`](../../personalCloud/ubuntuInit/SECURITY.md)
+- 相关：[`engineering-rules.md`](engineering-rules.md)、[`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md)、[`SECURITY.md`](../../personalCloud/ubuntuInit/SECURITY.md)
 
 ## 1. 安全红线
 
 - 不主动执行需要 root 的系统变更；需要 root 的操作生成脚本或命令清单，由用户在宿主终端执行。
-- sudo 被安全策略拒绝或目标盘只读时，**立即停止**：不 remount、不换路径、不造替代环境、不在 `/tmp` 或仓外临时目录做替代实验、不用工具内视图推断宿主机状态；把完整可复制脚本/命令交给用户（根 `AGENTS.md` 权限/只读阻断）。
+- sudo 被安全策略拒绝或目标盘只读时，**立即停止**：不 remount、不换路径、不造替代环境、不在 `/tmp` 或仓外临时目录做替代实验、不用工具内视图推断宿主机状态；把完整可复制脚本/命令交给用户。
 - 不在配置、文档、命令历史中硬编码密码、Token、私钥。
 - 不生成将 Web 服务绑定到 `0.0.0.0` 并暴露公网的配置。
 - 远程访问默认只通过 Tailscale。允许 Tailscale Funnel 暴露必要服务，但必须满足第 2 节。
@@ -38,16 +31,25 @@ Funnel 会把服务发布到公网，必须同时满足：
 
 判据：任何关于「大小 / 数量 / 存在性 / 是否启用」的结论，先确认当前身份读得到。命令成功但结果为空或偏小，通常是「看不见」，不是「没问题」。
 
-1. 结论前交叉验证：`du`、`df`、容器内 `du` 三者对照；容器数据从容器内查。
-2. 权限不足时写「需要 root 才能确认」，不给确定性结论；报告区分【已确认】与【未能确认（原因）】。
-3. 需要 root 才能确认的项，脚本降级为 `WARN + 提示 sudo`；sudo 被安全策略阻止时不反复提权。
-4. 工具运行在 Docker、沙箱或独立 mount namespace 时，其 `/mnt`、`/data` 视图不代表宿主机状态。不得据工具内只读或写入失败判断宿主机只读，也不建议擅自 `remount,rw`。
+| 来源 | 表现 | 判定 |
+|---|---|---|
+| 权限不足 | 输出为空、全 0 或只有 4K | 用 `id` 确认；需要 root 的项写成「无法确认」 |
+| UID 映射 | 宿主侧属主 `nobody:nogroup`、大小偏小 | 容器数据从容器内查，宿主侧视图不可信 |
+| 工具沙箱 namespace | 工具内 `/mnt` 只读、路径不同或不存在 | 不代表宿主机状态，以用户在宿主 shell 的操作为准 |
 
-详细误判案例和 `12-verify.sh` 降级实现见 [`host-permissions.md`](host-permissions.md)。
+常见误判：`du` 全是 4K 是容器目录普通用户读不到；`ufw status` 报错是只有 root 能运行；`mysql -uroot` 失败是 root 走 `auth_socket`；`command -v ufw` 找不到是 PATH 缺 `/usr/sbin`。结论前交叉验证 `du`、`df`、容器内 `du`；权限不足时区分【已确认】与【未能确认（原因）】。
 
-## 3.1 已确认的网络事实
+工具视图复核顺序：`id` → 命令跑在工具沙箱还是宿主 shell → 数字对不上换容器内/宿主视角 → 仍不可确认就输出可在宿主机执行的命令清单。工具内 `findmnt` 显示 `ro` + `test -w` 失败，不能推出宿主机只读，更不能建议 `sudo mount -o remount,rw`。
 
-- mini 主机 `zh-GEM-R7` 的局域网地址 `192.168.31.244` 已在路由器按 MAC（`c8:ff:bf:04:97:5a`）固定绑定，视同静态 IP；`ip addr` 的 `dynamic` 只是 DHCP 标志，不代表地址会变，不要建议改静态地址或把“先固定 IP”列为前置条件。绑定局域网 IP、防火墙放行、局域网直连可直接使用该地址。
+`ubuntuInit/12-verify.sh` 的降级基线：
+
+1. 补 PATH：`export PATH="${PATH}:/usr/sbin:/sbin"`。
+2. 抓 stderr 判权限，不把报错文本当结论。UFW 示例：`Status: active` → PASS；报 `be root|permission denied` → WARN；其余 → FAIL。
+3. WARN 是独立状态：退出码 `0` = 无 FAIL，`1` = 有 FAIL，`2` = `--strict` 且存在 WARN。需要 root 的项绝不输出 PASS。
+
+### 3.1 已确认的网络事实
+
+- mini 主机 `zh-GEM-R7` 的局域网地址 `192.168.31.244` 已在路由器按 MAC（`c8:ff:bf:04:97:5a`）固定绑定，视同静态 IP；`ip addr` 的 `dynamic` 只是 DHCP 标志，不建议改静态地址或把“先固定 IP”列为前置条件。
 
 ## 4. 磁盘与文件操作预检
 
@@ -69,7 +71,7 @@ sudo -n true 2>/dev/null || echo "sudo 不可用或需要密码"
 ## 5. 破坏性操作与重启
 
 - 删除文件、大范围重构、跨模块改动，即便看起来是“优化”，用户没明确要求就不执行。
-- 重启 `dsh-web` 或其他在线服务前，先报告原因、影响范围、预计中断和回滚方式，得到明确确认后执行。
+- 重启 `dsh-web` 或其他在线服务前，先报告原因、影响范围、预计中断和回滚方式，得到明确确认后执行；执行后复测并报告实际结果。
 - 同一目标连续 10 步没有新增可验证证据，或同一方案连续 2 次失败，停止试错，按 [`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md) 写会话交接。
 
 ## 6. 长任务后台执行
@@ -113,7 +115,8 @@ sudo kill "$(cat "$HOME/.cache/script.pid")"
 - 任何 root/只读阻断场景，交付物是可复制脚本 + 影响说明，而不是绕过方案；不得出现以 `/tmp` 或仓外临时目录替代目标路径的做法。
 - 公网暴露改动前后各留一次 `tailscale funnel status` 输出对照。
 - 长任务、测试任务收尾必须有报告、端口/PID 清理证据和资源回收数据。
+- 新增体检类脚本：无 root 时相关项输出 `WARN` 且带 `sudo` 提示；`--strict` 下存在 WARN 时退出码为 `2`。
 
 ## 失效条件
 
-- 主机名、局域网地址、Funnel 拓扑或浏览器调试脚本路径变化时同步修订；一次性事故复盘不留在本文件。
+- 主机名、局域网地址、Funnel 拓扑、`ubuntuInit/12-verify.sh` 降级实现或浏览器调试脚本路径变化时同步修订；一次性事故复盘不留在本文件。

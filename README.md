@@ -1,37 +1,32 @@
----
-audience: shared
-status: current
----
-
 # 跨仓文档
 
-> `/home/zh/www/doc` 存放跨仓文档、计划与隐私页。操作规则在 `_meta/doc/`，项目事实在各仓自己的 `README.md` / `STATUS.md`。
+> `/home/zh/www/doc` 存放跨仓规范、计划与人类历史资料。操作流程在 `_meta/doc/`，项目事实在各仓自己的 `README.md` / `STATUS.md` / `docs/`。
 
 ## 目录
 
-| 目录 | 放什么 | audience |
-|---|---|---|
-| `specs/` | 跨仓硬约束（工程、运维、权限、布局） | shared |
-| `plans/` | 跨仓任务计划 `PLAN-*.md` | human |
-| `guides/` | 可执行的跨仓操作指南 | shared |
-| `reference/` | 稳定事实、索引、对照表 | shared |
-| `decisions/` | 跨仓决策记录 | shared |
-| `archive/` | 已结束任务的过程记录与复盘 | human |
-| `subscribeWatch/` | 订阅监控隐私页 | human |
+| 目录 | 放什么 |
+|---|---|
+| `specs/` | 跨仓硬约束：工程、运行安全、文档规范 |
+| `plans/` | 当前活跃的跨仓计划 `PLAN-*.md` |
+| `reference/` | 稳定事实、索引、对照表等非必读参考 |
+| `archive/` | 已结束计划、过程记录与复盘 |
+| `subscribeWatch/` | 订阅监控隐私页 |
 
-`specs/` 是跨仓硬约束的唯一权威源；`personalCloud/doc/` 下的同名文件只留一行链接，不再保留正文。
+`specs/` 是跨仓硬约束的唯一权威源；其他位置只链接，不复制正文。
 
 ## 规则
 
-- 一个主题只放一份主文档，其他位置只留一行链接。每个 `specs/*.md` 必须写 `owner`、`scope`、适用范围、可执行的验收方式与失效条件。
-- 新计划 frontmatter 必须写 `implementation_status`，正文不再写状态行。
+- 一个主题只放一份主文档，其他位置只留链接。
+- 普通文档不写 frontmatter；`PLAN-*.md` 只写 `implementation_status`、`created_at`、`updated_at`，正文必须有 `## 改动记录`，每条只记「时间 + 改动点」。
 - 状态枚举：`not_started | in_progress | fixing | blocked | done | rolled_back`。
-- AI/shared 文档只写事实、约束、路由、可执行步骤；新文档上限分别为 120/200 行。
-- 背景与复盘放 `archive/`，决策理由放 `decisions/`，禁止多文档复制同一内容。
+- 只写事实、硬约束、路由、可执行步骤和最小验收；背景、推导、过程日志放 `archive/`。
+- 行数超限默认 `WARN`；断链、非法计划状态、缺计划元数据为 `FAIL`。完整规则见 [`specs/documentation-rules.md`](specs/documentation-rules.md)。
 
 ## 校验
 
 ```bash
 cd /home/zh/www
 ./scripts/check.sh --repo doc
+./scripts/check.sh --all --strict
+./scripts/docs-watch.sh --once
 ```
