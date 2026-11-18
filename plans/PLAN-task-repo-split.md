@@ -1,7 +1,7 @@
 ---
 audience: human
 status: current
-implementation_status: not_started
+implementation_status: done
 ---
 
 # PLAN：task 项目拆分为独立仓库
@@ -76,3 +76,13 @@ implementation_status: not_started
 - 从 `split/<name>` 分支恢复目录到 `personalCloud/task/<name>`，revert 删除提交。
 - 删除新仓远端前先保留本地仓库；索引和引用按旧 commit revert。
 - 运行中的数据/日志不进入 git；回滚只需恢复代码、SPEC 与文档，不动运行状态。
+
+## 实施记录（2026-11-18）
+
+- 远端：三个仓均复用 `person-clouds` 下同名 GitHub 仓（`dsh-workbench` 为本次新建、公开）；与第 7 步的 `zhyfor/` 默认值不同，原因是仓内 `package.json`、`PUBLISHING.md`、market 条目和安装文档都指向 `person-clouds`，换成个人仓会让已发布链接失效。
+- 历史：`git subtree split` 后各仓 `git log --follow` 可见原 `task/<name>` 提交；远端原有历史（context-guard 0.3.x、shortcuts 0.1.0）以 `-s ours` 合并保留，其中 context-guard 的 `context-guard/archive` 归档目录修复在本地主干上重做了一次（远端 0.3.1 有、本地 0.4.x 漏）。
+- 本地测试：workbench 4 个 `handover/test-*.mjs` 与 `test-retention-scripts.sh` 通过；context-guard `npm test` 通过（测试改为 `DSH_WORKSPACE_ROOT` 或默认 `/home/zh/www` 取文档门禁脚本，不再假设 personalCloud 层级）；shortcuts `npm test` 17 项通过。
+- 提交：personalCloud `4767a14`（补 SPEC）、`a15cf6b`（删旧目录）、`2f97980`（索引/登记/路径）、`ce5e989`（远端约定）；doc `7a12344`（引用改新路径）；新仓 `dsh-workbench 460756a`、`dsh-context-guard ad283fa`、`dsh-workflow-shortcuts 4807731`，均已推送。
+- 旧路径引用：`personalCloud` 与 `doc` 内 `task/dsh-workbench|dsh-context-guard|dsh-workflow-shortcuts` 清零；`split/<name>` 已删除。
+- 遗留：`health-watch` 的 `sa-state.sh` 默认路径已改绝对路径，宿主机若在旧 unit 里显式写死旧路径需另行改配置；三个仓的 GitHub Release 未重新打（0.4.1/0.2.0 尚未发布）。
+
