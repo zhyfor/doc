@@ -8,7 +8,7 @@ scope: /home/zh/www
 # 文档规范（spec）
 
 - 适用范围：`/home/zh/www` 下所有 Markdown 文档的新增、修改、合并、删除与检查。
-- 相关：[`AGENTS.md`](../../AGENTS.md)、[`PROJECT_INDEX.md`](../../PROJECT_INDEX.md)、[`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md)、[`PLAN-doc-slimming-and-tooling.md`](../plans/PLAN-doc-slimming-and-tooling.md)
+- 相关：[`AGENTS.md`](../../AGENTS.md)、[`PROJECT_INDEX.md`](../../PROJECT_INDEX.md)、[`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md)、[`PLAN-doc-slimming-and-tooling.md`](../archive/plans/PLAN-doc-slimming-and-tooling.md)
 
 ## 1. 文档层级与唯一源
 
