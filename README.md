@@ -28,5 +28,6 @@
 cd /home/zh/www
 ./scripts/check.sh --repo doc
 ./scripts/check.sh --all --strict
+./scripts/check.sh --all --slim    # 只列超限文档与 doc-slim 步骤
 ./scripts/docs-watch.sh --once
 ```

@@ -65,6 +65,7 @@ scope: /home/zh/www
 
 - `scripts/check.sh` 是唯一检查入口；`FAIL` 阻断：断链、非法计划状态、计划元数据或改动记录缺失。
 - 行数超限默认 `WARN`；计划含 `## 篇幅说明` 且 ≤400 行时不报 WARN；`--strict` 才返回失败。
+- `--slim` 只列 `[SLIM]` 超限清单与 doc-slim 步骤、不改文件，超限时退出码 1；精简后仍用 `--strict` 复核。
 - `scripts/docs-watch.sh` 每日只读巡检，失败才通知；不自动改文档。
 - 检查策略只有 `scripts/docs-policy.json` 一份；各仓不再放 `docs-policy.json`。
 - 过渡期已有普通文档的 `audience` / `status` 可暂留，检查器切换后统一移除。
