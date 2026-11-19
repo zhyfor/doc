@@ -2,7 +2,7 @@
 title: DSH 能力升级总计划（历史 / 现状 / 后续 · 交接版）
 implementation_status: in_progress
 created_at: 2026-11-19 20:15:00
-updated_at: 2026-11-19 21:45:00
+updated_at: 2026-11-19 21:30:00
 ---
 
 # PLAN：DSH 能力升级总计划（交接版）
@@ -12,7 +12,7 @@ updated_at: 2026-11-19 21:45:00
 
 ## 0. 新会话从这里开始
 
-**一句话**：2026-11-19 给这台机器补了一轮工具链和 DSH 配置：P0–P2 已完成并验证；P3 里 **ollama 已完成**（v0.40.16 + `qwen2.5vl:3b`，`dsh-vision describe` 打通），**radare2 / aria2 等用户 apt**。
+**一句话**：2026-11-19 给这台机器补了一轮工具链和 DSH 配置：P0–P2 已完成并验证；P3 的 Tier A **已全部落地**（ollama v0.40.16 + `qwen2.5vl:3b`、radare2 6.0.7、aria2 1.37.0），`dsh-vision describe` 已打通。
 
 **必读 3 个文件**
 
@@ -121,7 +121,7 @@ systemctl --user show dsh-web -p ActiveState -p Environment
 | DSH patch | `~/.dsh/cordis.patch.yml.bak.20261119-201330` |
 | web profile | `~/.dsh/profiles/web/package.json.bak.20261119-*` |
 
-## 3. 现状快照（2026-11-19 21:45）
+## 3. 现状快照（2026-11-19 21:30）
 
 **硬件**：AMD Ryzen 7 8845HS（16 线程，AVX-512）、46 GB 内存、Radeon 780M 核显（**无 CUDA**）、`/` 可用 734 GB、出口代理 `127.0.0.1:7897`。
 
@@ -143,7 +143,7 @@ systemctl --user show dsh-web -p ActiveState -p Environment
 
 | 步骤 | 执行者 | 状态 | 动作 / 结果 |
 |---|---|---|---|
-| A1 | 你（root） | **待执行** | `sudo apt install -y radare2 aria2`（3.9 MB + 1.9 MB） |
+| A1 | 你（root） | **完成** | `sudo apt install -y radare2 aria2` → radare2 **6.0.7**、aria2 **1.37.0**（`/usr/bin/r2`、`/usr/bin/aria2c`） |
 | A2 | AI（用户级） | **完成** | `ollama-linux-amd64.tar.zst` v0.40.16 → `~/opt/ollama`（解压后 2.5 GB） |
 | A3 | AI（用户级） | **完成** | `~/.config/systemd/user/dsh-ollama.service`：`OLLAMA_HOST=127.0.0.1:11434`、`OLLAMA_MODELS=~/.local/share/ollama/models`，已 `enable --now` |
 | A4 | AI（后台） | **完成** | `ollama pull qwen2.5vl:3b`（3.2 GB），`ollama list` 显示 `qwen2.5vl:3b fb90415cde1e 3.2 GB` |
@@ -162,14 +162,17 @@ systemctl --user show dsh-web -p ActiveState -p Environment
 
 **验收标准**：`dsh-vision describe` 不再报 `Connection refused`；ollama 只绑 `127.0.0.1`。——**已全部达成**。
 
-**A1 待用户执行**（AI 无 root）：
+**A1 验收（2026-11-19 21:30）**
 
 ```bash
-sudo apt install -y radare2 aria2
-r2 -v | head -1; aria2c --version | head -1
+rabin2 -I /bin/ls          # elf / x86-64 / binsz 等字段正常
+r2 -q -c 'pi 4 @ 0x1000' /bin/ls
+rabin2 -z /bin/ls | head   # .rodata 字符串正常
+aria2c -x4 -s4 -d ~/opt/aria2-test -o test.html https://example.com   # 577 B 落盘
 ```
 
-装完回报，我再补一条 `radare2`/`aria2c` 的功能抽样和文档记录。
+结论：radare2 反汇编/字符串可用；aria2 多连接下载可用（后续 GB 级文件优先 `aria2c -x16 -s16 -c`）。
+测试残留 `~/opt/aria2-test/` 可删。
 
 ### 4.2 Tier B —— 随时可做
 
@@ -248,6 +251,7 @@ for c in rg fd fzf bat delta sqlite3 shellcheck pandoc tesseract ocrmypdf \
          xdotool yq ruff duckdb dsh-rag; do command -v $c >/dev/null || echo "缺 $c"; done
 # 功能抽样
 rg --version | head -1; sqlite3 :memory: "select 1+1;"; duckdb -c "select 42;"; yq --version
+r2 -v | head -1; aria2c --version | head -1
 # ollama
 systemctl --user show dsh-ollama -p ActiveState
 ss -ltn | grep 11434           # 只应出现 127.0.0.1
@@ -268,4 +272,5 @@ cd /home/zh/www && ./scripts/check.sh --repo doc
 | 2026-11-19 20:34 | 补 duckdb v1.5.6，重启后三项验证通过 |
 | 2026-11-19 20:40 | 新增 P3 ROI 子文档（ollama/radare2/Ghidra/aria2/auditd/git-lfs） |
 | 2026-11-19 20:50 | 改写成交接版总计划：历史、现状、待办、规程、坑、验证清单 |
-| 2026-11-19 21:45 | Tier A 的 ollama 落地（v0.40.16 + qwen2.5vl:3b，用户级 unit 只绑 127.0.0.1）；`dsh-vision describe` 验收通过；radare2/aria2 待用户 apt |
+| 2026-11-19 21:28 | Tier A 的 ollama 落地（v0.40.16 + qwen2.5vl:3b，用户级 unit 只绑 127.0.0.1）；`dsh-vision describe` 验收通过；radare2/aria2 待用户 apt |
+| 2026-11-19 21:30 | 用户 apt 装好 radare2 6.0.7 + aria2 1.37.0；rabin2/r2/aria2c 抽样通过，Tier A 全部完成 |
