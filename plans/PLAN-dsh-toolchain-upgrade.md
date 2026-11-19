@@ -2,7 +2,7 @@
 title: DSH 能力升级总计划（历史 / 现状 / 后续 · 交接版）
 implementation_status: in_progress
 created_at: 2026-11-19 20:15:00
-updated_at: 2026-11-19 20:50:00
+updated_at: 2026-11-19 21:45:00
 ---
 
 # PLAN：DSH 能力升级总计划（交接版）
@@ -12,7 +12,7 @@ updated_at: 2026-11-19 20:50:00
 
 ## 0. 新会话从这里开始
 
-**一句话**：2026-11-19 给这台机器补了一轮工具链和 DSH 配置，P0–P2 已完成并验证，P3（ollama、radare2、aria2 等）待执行，方案已备好。
+**一句话**：2026-11-19 给这台机器补了一轮工具链和 DSH 配置：P0–P2 已完成并验证；P3 里 **ollama 已完成**（v0.40.16 + `qwen2.5vl:3b`，`dsh-vision describe` 打通），**radare2 / aria2 等用户 apt**。
 
 **必读 3 个文件**
 
@@ -121,7 +121,7 @@ systemctl --user show dsh-web -p ActiveState -p Environment
 | DSH patch | `~/.dsh/cordis.patch.yml.bak.20261119-201330` |
 | web profile | `~/.dsh/profiles/web/package.json.bak.20261119-*` |
 
-## 3. 现状快照（2026-11-19 20:50）
+## 3. 现状快照（2026-11-19 21:45）
 
 **硬件**：AMD Ryzen 7 8845HS（16 线程，AVX-512）、46 GB 内存、Radeon 780M 核显（**无 CUDA**）、`/` 可用 734 GB、出口代理 `127.0.0.1:7897`。
 
@@ -132,7 +132,8 @@ systemctl --user show dsh-web -p ActiveState -p Environment
 | `dsh-web` | `https://zh-gem-r7.tailb6e152.ts.net:8443/`（本机 127.0.0.1:3080） | active |
 | `dsh-ml`（embedding/PDF/OCR） | `127.0.0.1:8765` | ready，模型 `bge-m3`、`bge-small-zh-v1.5`、`bge-reranker-v2-m3` 已加载 |
 | `dsh-rag` | `~/.local/bin/dsh-rag`，MCP `workdirrag` | 索引 4226 文件 / 53967 块，**向量 0/53967**（见 §4.4） |
-| `dsh-vision` | `~/.local/bin/dsh-vision` | `ocr`/`info`/`enhance` 可用，**`describe` 因缺 ollama 报错** |
+| `dsh-vision` | `~/.local/bin/dsh-vision` | `ocr`/`info`/`enhance`/`describe` **全部可用**（describe 走本机 ollama） |
+| `dsh-ollama` | `127.0.0.1:11434`，程序 `~/opt/ollama` | active；模型 `qwen2.5vl:3b`（3.2 GB），空载自动卸载 |
 
 **DSH 运行时**：0.2.2-rc.1，profile `web`，preset `preset-standard`（**不是** `preset-minimal`，所以没有持久 bash）。
 
@@ -140,15 +141,35 @@ systemctl --user show dsh-web -p ActiveState -p Environment
 
 ### 4.1 Tier A —— 建议下一步就做（rollout 详见 ROI 文档）
 
-| 步骤 | 执行者 | 动作 |
-|---|---|---|
-| A1 | 你（root） | `sudo apt install -y radare2 aria2`（3.9 MB + 1.9 MB） |
-| A2 | AI（用户级） | 下载 `ollama-linux-amd64.tar.zst`（v0.40.16），解压 `~/opt/ollama` |
-| A3 | AI（用户级） | 写 `~/.config/systemd/user/dsh-ollama.service`：`OLLAMA_HOST=127.0.0.1:11434`、`OLLAMA_MODELS=~/.local/share/ollama/models`，`enable --now` |
-| A4 | AI（后台） | `ollama pull qwen2.5vl:3b`（3.2 GB） |
-| A5 | AI | 验收：`dsh-vision describe <截图>` 返回中文描述；`ollama ps` 看占用 |
+| 步骤 | 执行者 | 状态 | 动作 / 结果 |
+|---|---|---|---|
+| A1 | 你（root） | **待执行** | `sudo apt install -y radare2 aria2`（3.9 MB + 1.9 MB） |
+| A2 | AI（用户级） | **完成** | `ollama-linux-amd64.tar.zst` v0.40.16 → `~/opt/ollama`（解压后 2.5 GB） |
+| A3 | AI（用户级） | **完成** | `~/.config/systemd/user/dsh-ollama.service`：`OLLAMA_HOST=127.0.0.1:11434`、`OLLAMA_MODELS=~/.local/share/ollama/models`，已 `enable --now` |
+| A4 | AI（后台） | **完成** | `ollama pull qwen2.5vl:3b`（3.2 GB），`ollama list` 显示 `qwen2.5vl:3b fb90415cde1e 3.2 GB` |
+| A5 | AI | **完成** | `dsh-vision describe <截图>` 返回中文描述；`ollama ps`：2.8 GB、100% CPU、ctx 4096 |
 
-**验收标准**：`dsh-vision describe` 不再报 `Connection refused`；ollama 只绑 `127.0.0.1`。
+**实测数据（2026-11-19 21:40）**
+
+| 项 | 结果 |
+|---|---|
+| 绑定 | `ss -ltn` 只有 `127.0.0.1:11434`，未对外监听 |
+| 冷启动 describe | 72.7 s（含加载模型） |
+| 热启动 describe | 9.8 s / 218 eval tokens（抖音创作者中心截图，返回中文界面描述正确） |
+| 内存占用 | `ollama ps` 2.8 GB，`OLLAMA_KEEP_ALIVE=5m` 后自动卸载 |
+| 程序下载 | GitHub release 单连接约 210 KB/s；改 16 段并发后约 3–5 MB/s，1.43 GB 约 8 分钟 |
+| 模型下载 | `registry.ollama.ai` 走代理峰值 78 MB/s，末尾第 7 段卡死，重启 pull 后续传完成 |
+
+**验收标准**：`dsh-vision describe` 不再报 `Connection refused`；ollama 只绑 `127.0.0.1`。——**已全部达成**。
+
+**A1 待用户执行**（AI 无 root）：
+
+```bash
+sudo apt install -y radare2 aria2
+r2 -v | head -1; aria2c --version | head -1
+```
+
+装完回报，我再补一条 `radare2`/`aria2c` 的功能抽样和文档记录。
 
 ### 4.2 Tier B —— 随时可做
 
@@ -213,6 +234,9 @@ AI 不执行，生成可复制命令交用户在宿主终端跑。本次 apt 就
 | `rm` 被策略拦 | 删除 `/tmp` 文件被拒 | 用户将开 `/tmp` 删除白名单；或交用户执行 |
 | `preset-standard` 无持久 bash | 每条命令是独立 `bash -c`，`cd` 不保留 | 用 `workdir` 参数或绝对路径 |
 | 重启杀子代理 | 重启 dsh-web 时子代理一起死 | 重启前先收尾或等其结束 |
+| GitHub release 单连接限速 | `curl` 直下 ollama 只有 200 KB/s，1.4 GB 要 2 小时 | 用 `~/opt/ollama-dl.sh`：16 段并发各写 `part.NN`，最后 `cat` 合并 + `zstd -t` 校验 |
+| `ollama pull` 单段卡死 | 15/16 段完成、最后一段 0% 不动，进度条停在 100% | `kill` pull 客户端 → `systemctl --user restart dsh-ollama` → 重新 pull，已下部分自动续传 |
+| Registry 反而比 GitHub 快 | GitHub 1–3 MB/s，`registry.ollama.ai` 峰值 78 MB/s | 模型不必找国内源；先直连实测再决定 |
 
 ## 7. 验证清单（收尾时跑）
 
@@ -224,6 +248,11 @@ for c in rg fd fzf bat delta sqlite3 shellcheck pandoc tesseract ocrmypdf \
          xdotool yq ruff duckdb dsh-rag; do command -v $c >/dev/null || echo "缺 $c"; done
 # 功能抽样
 rg --version | head -1; sqlite3 :memory: "select 1+1;"; duckdb -c "select 42;"; yq --version
+# ollama
+systemctl --user show dsh-ollama -p ActiveState
+ss -ltn | grep 11434           # 只应出现 127.0.0.1
+~/opt/ollama/bin/ollama list   # qwen2.5vl:3b
+dsh-vision describe <某张截图>  # 返回中文描述，热启约 10 s
 # DSH
 cd /home/zh/www/personalCloud/workspace && python3 scripts/dsh-config-check.py --deep | tail -3
 # 文档门禁
@@ -239,3 +268,4 @@ cd /home/zh/www && ./scripts/check.sh --repo doc
 | 2026-11-19 20:34 | 补 duckdb v1.5.6，重启后三项验证通过 |
 | 2026-11-19 20:40 | 新增 P3 ROI 子文档（ollama/radare2/Ghidra/aria2/auditd/git-lfs） |
 | 2026-11-19 20:50 | 改写成交接版总计划：历史、现状、待办、规程、坑、验证清单 |
+| 2026-11-19 21:45 | Tier A 的 ollama 落地（v0.40.16 + qwen2.5vl:3b，用户级 unit 只绑 127.0.0.1）；`dsh-vision describe` 验收通过；radare2/aria2 待用户 apt |

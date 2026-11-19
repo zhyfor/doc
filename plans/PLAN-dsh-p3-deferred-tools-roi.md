@@ -63,6 +63,8 @@ dsh-vision：连接本机 Ollama 失败（http://127.0.0.1:11434）：[Errno 111
 
 **结论**：装。这是唯一一项"装完立刻消除一个已存在的报错"的能力项。
 
+**已落地实测（2026-11-19 21:45）**：`~/opt/ollama` v0.40.16 + 用户级 `dsh-ollama.service`（只绑 `127.0.0.1:11434`）+ `qwen2.5vl:3b`。`dsh-vision describe` 冷启 72.7 s、热启 9.8 s（218 eval tokens），加载占用 2.8 GB、100% CPU。模型下载走官方 registry 峰值 78 MB/s，不需要国内源。
+
 ### 3.2 Ghidra vs radare2 —— 拆成"日常"和"专项"
 
 | 维度 | Ghidra 12.2 | radare2 6.0.7 |
