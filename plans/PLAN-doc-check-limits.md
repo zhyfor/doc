@@ -1,7 +1,7 @@
 ---
-implementation_status: in_progress
+implementation_status: done
 created_at: 2026-11-19 22:40:00
-updated_at: 2026-11-19 22:52:00
+updated_at: 2026-11-19 23:02:00
 ---
 
 # PLAN：文档检查与篇幅限制优化
@@ -25,7 +25,7 @@ updated_at: 2026-11-19 22:52:00
 | 新增 | `doc/specs/task-workflow.md` | 由 `_meta/doc/task-workflow.md` 迁入并压缩到 117 行 |
 | 新增 | `doc/specs/project-registry.md` | 迁入，只修链接 |
 | 新增 | `doc/specs/github-collaboration.md` | 迁入，只修链接 |
-| 修改 | `scripts/docs-policy.json` | `plan_status.long_plan`：标题 `## 篇幅说明`、`max_lines: 400` |
+| 修改 | `scripts/docs-policy.json` | 新增 `plan_status.long_plan`（`## 篇幅说明`、400 行）；删除 `_meta` 残留 glob |
 | 修改 | `scripts/check_docs.py` | 计划声明篇幅说明后放宽上限；行数 WARN 附 `doc-slim` 提示 |
 | 修改 | `scripts/check.sh` | 帮助文本说明长计划规则 |
 | 修改 | `doc/specs/documentation-rules.md` | 文档层级、计划篇幅、检查规则 |
@@ -78,3 +78,4 @@ updated_at: 2026-11-19 22:52:00
 | 2026-11-19 22:48 | 策略与检查器完成：`long_plan`、`## 篇幅说明` 放宽、INFO/WARN 文案 |
 | 2026-11-19 22:50 | 三份规则迁入 `doc/specs/`；`task-workflow.md` 压缩到 117 行；删除 `_meta` 目录与根链接 |
 | 2026-11-19 22:52 | 更新 `doc`、`personalCloud`、三个引用仓；新建 `doc-slim` 技能；`check.sh --all --strict` 13 仓通过 |
+| 2026-11-19 23:02 | 移除策略里 `_meta` 残留 glob；`--all --strict` 13 仓通过；五个仓已提交推送 |
