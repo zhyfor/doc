@@ -82,8 +82,8 @@ ollama（模型 GB 级）、Ghidra（REA provider）、auditd、aria2、git-lfs�
 | `@upstash/context7-mcp` | 已全局安装；`cordis.patch.yml` 新增 `context7-mcp`（2 工具） |
 | `dsh-experimental-session-search@0.2.2-rc.1` | 已装入 web profile，bundle 已登记 |
 | `dsh-config-check.py --deep` | 通过（结论：配置可加载） |
-| apt 系统包 | 待用户执行 |
-| 重启 dsh-web | 待执行 |
+| apt 系统包 | 已装 22 个，逐个 `command -v` 通过：rg/fd/fzf/bat/delta/sqlite3/shellcheck/pandoc/tesseract(chi_sim+eng)/ocrmypdf/convert/exiftool/qpdf/mediainfo/mkvinfo/csvlook/mlr/zoxide/hyperfine/xdotool |
+| 重启 dsh-web | 待执行（重启后验证 context7 与 session-search 工具挂载） |
 
 ## 顺带修的一个脚本缺陷
 
