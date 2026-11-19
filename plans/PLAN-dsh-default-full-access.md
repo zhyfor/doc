@@ -1,7 +1,7 @@
 ---
 implementation_status: done
-created_at: 2026-11-19
-updated_at: 2026-11-19
+created_at: 2026-11-19 00:00:00
+updated_at: 2026-11-19 00:00:00
 ---
 
 # PLAN：DSH 默认权限改为 danger-full-access
