@@ -172,7 +172,7 @@ aria2c -x4 -s4 -d ~/opt/aria2-test -o test.html https://example.com   # 577 B �
 ```
 
 结论：radare2 反汇编/字符串可用；aria2 多连接下载可用（后续 GB 级文件优先 `aria2c -x16 -s16 -c`）。
-测试残留 `~/opt/aria2-test/` 可删。
+下载残留（`ollama-linux-amd64.tar.zst`、`ollama-dl/` 分段、四个下载日志、`aria2-test/`，共约 2.9 GB）已清理，`~/opt/ollama/` 程序本体保留。
 
 ### 4.2 Tier B —— 随时可做
 
@@ -273,4 +273,5 @@ cd /home/zh/www && ./scripts/check.sh --repo doc
 | 2026-11-19 20:40 | 新增 P3 ROI 子文档（ollama/radare2/Ghidra/aria2/auditd/git-lfs） |
 | 2026-11-19 20:50 | 改写成交接版总计划：历史、现状、待办、规程、坑、验证清单 |
 | 2026-11-19 21:28 | Tier A 的 ollama 落地（v0.40.16 + qwen2.5vl:3b，用户级 unit 只绑 127.0.0.1）；`dsh-vision describe` 验收通过；radare2/aria2 待用户 apt |
+| 2026-11-19 21:40 | 清理下载残留约 2.9 GB（tar 包、分段目录、日志、aria2 测试目录），`~/opt/ollama` 保留 |
 | 2026-11-19 21:30 | 用户 apt 装好 radare2 6.0.7 + aria2 1.37.0；rabin2/r2/aria2c 抽样通过，Tier A 全部完成 |
