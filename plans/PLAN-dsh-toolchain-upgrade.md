@@ -1,7 +1,7 @@
 ---
-implementation_status: not_started
+implementation_status: done
 created_at: 2026-11-19 20:15:00
-updated_at: 2026-11-19 20:15:00
+updated_at: 2026-11-19 20:25:00
 ---
 
 # PLAN：补齐本机工具链与 DSH 能力（一天升级）
@@ -44,7 +44,7 @@ ln -sf "$(command -v fdfind)" ~/.local/bin/fd
 ln -sf "$(command -v batcat)" ~/.local/bin/bat
 ```
 
-用户级补充（AI 执行）：`uv tool install duckdb`、`~/.local/bin/yq`（GitHub 二进制，不用 apt 的 Python 版）、`uv tool install ruff`。
+用户级补充（AI 执行）：`duckdb` CLI v1.5.6（GitHub release `duckdb_cli-linux-amd64.zip`，`latest` 标签没有该资产，需指定版本）、`~/.local/bin/yq` v4.54.3（GitHub 二进制，不用 apt 的 Python 版）、`ruff` 0.17.5（`uv tool`）。
 
 ### P2 按需 DSH 能力（需重启 dsh-web）
 
@@ -78,12 +78,14 @@ ollama（模型 GB 级）、Ghidra（REA provider）、auditd、aria2、git-lfs�
 | `dsh-web.service` PATH 前置 `%h/.local/bin` | 已改 + `daemon-reload`，待重启生效 |
 | `yq v4.54.3` | 已装到 `~/.local/bin/yq` |
 | `ruff 0.17.5` | 已装（`uv tool`） |
-| `duckdb` | 未装：`uv tool install duckdb` 无 CLI 入口被回滚；GitHub release 资产名 404，待查 |
+| `duckdb` | 已装 v1.5.6：`uv tool install duckdb` 无 CLI 入口被回滚；改用 `releases/download/v1.5.6/duckdb_cli-linux-amd64.zip`（`latest` 标签无此资产）→ `~/.local/bin/duckdb`，`select 42` 通过 |
 | `@upstash/context7-mcp` | 已全局安装；`cordis.patch.yml` 新增 `context7-mcp`（2 工具） |
 | `dsh-experimental-session-search@0.2.2-rc.1` | 已装入 web profile，bundle 已登记 |
 | `dsh-config-check.py --deep` | 通过（结论：配置可加载） |
 | apt 系统包 | 已装 22 个，逐个 `command -v` 通过：rg/fd/fzf/bat/delta/sqlite3/shellcheck/pandoc/tesseract(chi_sim+eng)/ocrmypdf/convert/exiftool/qpdf/mediainfo/mkvinfo/csvlook/mlr/zoxide/hyperfine/xdotool |
-| 重启 dsh-web | 待执行（重启后验证 context7 与 session-search 工具挂载） |
+| 重启 dsh-web | 已完成 20:18:56；非交互 shell PATH 含 `~/.local/bin`，`fd/bat/yq/ruff/gh/dsh-rag/uv/duckdb` 均可直接调用 |
+| context7 MCP | 已挂载并实测：`resolve-library-id` 返回 DuckDB 5 条结果 |
+| session-search 工具 | 已挂载：`session_search` 可调用（当前库无匹配属正常） |
 
 ## 顺带修的一个脚本缺陷
 
