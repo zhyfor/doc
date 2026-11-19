@@ -112,7 +112,7 @@ sudo kill "$(cat "$HOME/.cache/script.pid")"
 - 用 Playwright 库时必须 `try/finally { await browser.close() }`，不能只 `disconnect`。
 - 结束确认：命令退出、CDP 端口关闭、没有残留 `chrome-linux/chrome`。
 
-完整规则见 [`.dsh/skills/browser-debug/SKILL.md`](../../personalCloud/.dsh/skills/browser-debug/SKILL.md)。
+完整规则见 [`.dsh/skills/browser-debug/SKILL.md`](../../.dsh/skills/browser-debug/SKILL.md)。
 
 ## 验收方式
 
