@@ -2,7 +2,7 @@
 title: DSH 能力升级总计划（历史 / 现状 / 后续 · 交接版）
 implementation_status: in_progress
 created_at: 2026-11-19 20:15:00
-updated_at: 2026-11-19 21:30:00
+updated_at: 2026-11-19 22:50:00
 ---
 
 # PLAN：DSH 能力升级总计划（交接版）
@@ -263,6 +263,17 @@ cd /home/zh/www/personalCloud/workspace && python3 scripts/dsh-config-check.py -
 cd /home/zh/www && ./scripts/check.sh --repo doc
 ```
 
+## 篇幅说明
+
+本计划超过默认 200 行，保留到 400 行以内，原因：
+
+- §2、§3 是已完成项的验收证据和版本快照，新会话判断“装没装、哪个版本”直接查表，不用重新探测；
+- §4 的待办按 Tier 分档，每档都带 ROI、前置条件和退出条件，删掉条件会导致重复返工；
+- §5、§6 是交接规程与踩坑记录，属于“下个会话必须知道、否则会重犯”的内容；
+- §7 的命令清单可直接复制执行，是验收依据。
+
+可压缩位置：§1 背景可再压到半屏，§2 的逐条安装细节可在全部验收后移入 `doc/archive/`；压缩时优先保留 §4–§7。
+
 ## 改动记录
 
 | 日期 | 内容 |
@@ -275,3 +286,4 @@ cd /home/zh/www && ./scripts/check.sh --repo doc
 | 2026-11-19 21:28 | Tier A 的 ollama 落地（v0.40.16 + qwen2.5vl:3b，用户级 unit 只绑 127.0.0.1）；`dsh-vision describe` 验收通过；radare2/aria2 待用户 apt |
 | 2026-11-19 21:40 | 清理下载残留约 2.9 GB（tar 包、分段目录、日志、aria2 测试目录），`~/opt/ollama` 保留 |
 | 2026-11-19 21:30 | 用户 apt 装好 radare2 6.0.7 + aria2 1.37.0；rabin2/r2/aria2c 抽样通过，Tier A 全部完成 |
+| 2026-11-19 22:50 | 补 `## 篇幅说明`，按新策略保留交接证据（≤400 行） |

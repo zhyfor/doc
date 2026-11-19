@@ -1,7 +1,7 @@
 # 工程规则（spec）
 
 - 适用范围：`/home/zh/www` 内所有代码、脚本、配置和数据结构改动。
-- 相关：[`operations-safety.md`](operations-safety.md)、[`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md)
+- 相关：[`operations-safety.md`](operations-safety.md)、[`task-workflow.md`](task-workflow.md)
 
 ## 1. 不编造
 
@@ -37,7 +37,7 @@
 
 - 一个步骤对应一个明确产出文件或可观测结果。
 - 关键决策和推理写入文件，不依赖对话记忆。
-- 跨仓多步任务按 [`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md) 执行：先讨论、再落计划、最后新会话实施。
+- 跨仓多步任务按 [`task-workflow.md`](task-workflow.md) 执行：先讨论、再落计划、最后新会话实施。
 
 ## 6. 新 Go 项目
 

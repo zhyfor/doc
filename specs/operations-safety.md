@@ -1,7 +1,7 @@
 # 运行安全与操作规范（spec）
 
 - 适用范围：涉及宿主机、权限、磁盘、服务重启、长任务、测试和临时浏览器的操作。
-- 相关：[`engineering-rules.md`](engineering-rules.md)、[`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md)、[`SECURITY.md`](../../personalCloud/ubuntuInit/SECURITY.md)
+- 相关：[`engineering-rules.md`](engineering-rules.md)、[`task-workflow.md`](task-workflow.md)、[`SECURITY.md`](../../personalCloud/ubuntuInit/SECURITY.md)
 
 ## 1. 安全红线
 
@@ -76,7 +76,7 @@ sudo -n true 2>/dev/null || echo "sudo 不可用或需要密码"
 
 - 删除文件、大范围重构、跨模块改动，即便看起来是“优化”，用户没明确要求就不执行。
 - 重启 `dsh-web` 或其他在线服务前，先报告原因、影响范围、预计中断和回滚方式，得到明确确认后执行；执行后复测并报告实际结果。
-- 同一目标连续 10 步没有新增可验证证据，或同一方案连续 2 次失败，停止试错，按 [`task-workflow.md`](../../personalCloud/workspace/_meta/doc/task-workflow.md) 写会话交接。
+- 同一目标连续 10 步没有新增可验证证据，或同一方案连续 2 次失败，停止试错，按 [`task-workflow.md`](task-workflow.md) 写会话交接。
 
 ## 6. 长任务后台执行
 
