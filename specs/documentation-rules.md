@@ -18,7 +18,7 @@ scope: /home/zh/www
 | 工作区导航 | `PROJECT_INDEX.md` | 只做入口和仓库索引 |
 | 跨仓流程与硬约束 | `doc/specs/` | 任务流程、工程、运维、文档等长期规则 |
 | 非必读参考 | `doc/reference/` | 稳定但不必背诵的操作事实 |
-| 活跃计划 | `doc/plans/` | 一次性的实施计划 |
+| 活跃计划 | 各仓 `plans/`、跨仓 `doc/plans/` | 一次性的实施计划 |
 | 历史资料 | `doc/archive/` | 已完成计划与复盘，不要求 AI 必读 |
 | 项目事实 | 各仓 `README.md` / `STATUS.md` / `SPEC.md` | 只属于该项目的状态和做法 |
 
@@ -45,14 +45,14 @@ scope: /home/zh/www
 
 ## 4. 计划文档
 
-- 位置：`doc/plans/PLAN-<主题>.md`；跨仓计划统一放这里，项目内计划放项目仓。
+- 位置：单仓计划放 `<repo>/plans/PLAN-<主题>.md`，同仓文件名唯一，不用 `PLAN.md`；跨仓计划放 `doc/plans/PLAN-<主题>.md`。仓库根不再平铺计划文件。
 - 首行 H1 必须是 `# PLAN：<简短标题>`，使用全角冒号。
 - frontmatter 只保留：`implementation_status`、`created_at`、`updated_at`，时间格式 `Y-m-d H:i:s`。
 - 状态枚举：`not_started | in_progress | fixing | blocked | done | rolled_back`。
 - 正文必须有 `## 改动记录`，每条只写“时间 + 改动点”。
 - 正文只写：目标、范围、改动位置、实施步骤、验收、回滚；不写复盘和过程流水。
 - 篇幅默认 ≤200 行；确需保留交接证据、命令清单等多行内容时，正文加 `## 篇幅说明` 写明原因、必须保留的段落和可压缩位置，上限放宽到 400 行。
-- 计划完成后移入 `doc/archive/plans/`，活跃计划目录只留正在做或确实阻塞的计划。
+- 计划完成后单仓移入 `<repo>/plans/archive/`、跨仓移入 `doc/archive/plans/`；活跃目录只留正在做或确实阻塞的计划。
 
 ## 5. 生命周期与 AI 责任
 
