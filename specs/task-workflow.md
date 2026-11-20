@@ -10,7 +10,7 @@
 ```
 
 - 讨论：只读代码、配置、git 状态；输出方案、边界、风险和待确认问题。改动位置明确的简单功能点可顺手完成并同步 README/STATUS/PROJECT_INDEX；复杂改动先出计划等确认。
-- 计划：跨仓任务写 `/home/zh/www/doc/plans/PLAN-<主题>.md`；单仓任务写该仓 `PLAN-<主题>.md`。
+- 计划：单仓任务写该仓 `plans/PLAN-<主题>.md`；跨仓任务写 `/home/zh/www/doc/plans/PLAN-<主题>.md`。文档格式见 `documentation-rules.md` §4。
 - 实施：只读计划与必要代码；编辑前确认目标仓和写权限；不重新开放式探索。
 
 会话边界：
