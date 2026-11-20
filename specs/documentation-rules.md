@@ -67,5 +67,6 @@ scope: /home/zh/www
 - 行数超限默认 `WARN`；计划含 `## 篇幅说明` 且 ≤400 行时不报 WARN；`--strict` 才返回失败。
 - `--slim` 只列 `[SLIM]` 超限清单与 doc-slim 步骤、不改文件，超限时退出码 1；精简后仍用 `--strict` 复核。
 - `scripts/docs-watch.sh` 每日只读巡检，失败才通知；不自动改文档。
+- 批量规范化：`./scripts/plan-tool.py normalize <仓>...` 修正计划 frontmatter（只留三键、`created_at` 取 git 首次提交）与 H1 / `## 改动记录`；`relink <仓>...` 按 git 重命名记录改写被移动文档的 md 引用（跳过 archive）。两者都支持 `--dry-run`，改完仍用 `check.sh --strict` 复核。
 - 检查策略只有 `scripts/docs-policy.json` 一份；各仓不再放 `docs-policy.json`。
 - 过渡期已有普通文档的 `audience` / `status` 可暂留，检查器切换后统一移除。
