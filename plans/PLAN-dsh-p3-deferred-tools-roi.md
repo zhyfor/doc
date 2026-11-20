@@ -1,7 +1,6 @@
 ---
-title: DSH 待装能力项方案与 ROI 评估
 implementation_status: not_started
-created_at: 2026-11-19 20:40:00
+created_at: 2026-11-19 20:36:08
 updated_at: 2026-11-19 20:40:00
 ---
 
