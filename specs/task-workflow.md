@@ -78,7 +78,7 @@ test -w . && echo writable || echo READONLY
 
 - 默认分支以 `repos.yaml` 的 `default_branch` 为准；非默认分支时先列当前分支、未合并提交、是否已推送，等用户选择。
 - 禁止自动 merge、`push --force`、删除未提交改动；非快进时允许 `git pull --rebase origin <默认分支>` 后重推，rebase 冲突才停下报告。
-- `/home/zh/www/dsh-superagent` 在 `feat/executor-budget-phase-end`，未合入 `main`；涉及 SA 必须提醒，不得自动合并。
+- `/home/zh/www/dsh-superagent` 默认分支 `main`，原 `feat/executor-budget-phase-end` 已合入；该仓由 zhyfor 维护，改动按普通仓流程提交。
 - 每仓独立 `git add <明确文件>`、`commit`、`push`；禁止 `git add -A` 扫过多个仓库。
 - 提交前逐仓 `git status --short`；只提交本任务文件，无关 dirty 保持原状并报告；`.bak` 等临时文件不入库；提交信息用 `type(scope): 摘要`。
 - 收尾输出每仓分支、commit、push 结果、测试结果、剩余 dirty，以及「需要你执行」清单（无则写「无」）。

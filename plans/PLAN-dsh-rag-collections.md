@@ -18,7 +18,7 @@ updated_at: 2026-11-21 17:36:56
 
 - 本轮不索引 `project-experience`。当前审核流程和新经验体验都不好（每条都是完整文件 diff、重复标题多），等经验库改版后再作为最高权重集合单独立项。
 - 不做 rerank / LLM 摘要 / 后台 watcher；不启用 gitnexus（当前 `disabled: true` 且无索引）。
-- 不改 S3 协议；不做“大一统单索引”；不改 dsh-superagent 分支（仍在 `feat/executor-budget-phase-end`，不合并）。
+- 不改 S3 协议；不做“大一统单索引”；不改 dsh-superagent（原 `feat/executor-budget-phase-end` 已合入 `main`，本任务只读）。
 
 ## 前置条件（本计划阻塞于此）
 
