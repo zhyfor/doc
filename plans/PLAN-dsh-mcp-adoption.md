@@ -122,7 +122,7 @@ systemctl --user restart dsh-web
 
 | 步骤 | 结果 |
 |---|---|
-| S2 | `gitnexus@1.6.12` 装到 `/home/zh/.npm-global`；`doctor` 无致命项；FTS/VECTOR 扩展离线不可用（`GITNEXUS_LBUG_EXTENSION_INSTALL=auto` 可补），不影响图查询 |
+| S2 | `gitnexus@1.6.12` 装到 `/home/zh/.npm-global`；`doctor` 无致命项；FTS 开箱可用，VECTOR 扩展首次离线不可用，后经 `GITNEXUS_LBUG_EXTENSION_INSTALL=auto` 联网 `INSTALL` 成功（见 mcp-control 的「本机向量能力」） |
 | S3 | `dsh-context-guard`：38 文件 / 1,126 节点 / 2,837 边 / 40 聚类 / 76 流程；首次 8.9s；索引 44 MB；`git status --short` 为空 |
 | S4 | `gitnexus-mcp` 已注册并 `disabled: true`；`dsh-config-check.py --deep` 通过（6 条既有 profile patch 告警与本次无关）；`mcpctl check` 因既有 `!!js` 标签报错，属旧问题 |
 | S5 | 17 个工具、schema 约 71 KB；新会话首个请求 15,523 → 32,335 tokens（+16.8k）；三类图问题答得上（impact/trace 带 uid、confidence、process）；结论**默认停** |
