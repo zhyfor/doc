@@ -1,7 +1,7 @@
 ---
 implementation_status: not_started
 created_at: 2026-11-21 17:50:00
-updated_at: 2026-11-21 18:20:00
+updated_at: 2026-11-21 18:32:00
 ---
 
 # PLAN：SA 仓项目迁出与项目落点规范
@@ -78,6 +78,7 @@ www/
 
 1. 阶段 2 第 3 步重写个人邮箱；推送前 `git log --format='%ae' | sort -u` 复核只剩 noreply。
 2. 仓先建 private；转 public 前逐仓确认「无凭据、无个人信息、无客户数据」并在台账留记录。
+   **已定（2026-11-21）**：5 仓先保持 private，跑通并验收后再逐个转 public，转化前逐仓过一遍本表并留记录。
 3. 含内部路径/流程截图的目录（`experience-review/`）不随独立仓公开，只并入 `project-experience`。
 
 ## 去本机路径与环境指纹
@@ -195,7 +196,7 @@ git -C /home/zh/www/workdir-rag push -u origin main
 - 从「阶段 0」顺序推进；阶段 2 按 `workdir-rag` → `dsh-local-vision` → `free-ai-router` → `dsh-immersive-glass` → `dsh-py-runtime` 逐个做，每仓做完即验证、即推送，不攒着。
 - 5 个远程（private，空仓）：
   `https://github.com/person-clouds/{workdir-rag,dsh-local-vision,free-ai-router,dsh-immersive-glass,dsh-py-runtime}.git`
-- 唯一待用户决策：独立仓最终是否转 public（逐仓判断，默认保持 private）。
+- 公开策略已定：先 private 跑通，再逐个转 public（转前逐仓过安全关、留台账）。
 - 全部做完后：`implementation_status` 改 `done`，计划移入 `doc/archive/plans/`。
 
 ## 验收
@@ -221,6 +222,7 @@ git -C /home/zh/www/workdir-rag push -u origin main
 ## 改动记录
 
 - 2026-11-21 17:50 初稿：确定 9 项去向、落点规则写入 project-registry §8、5 个独立仓与 subtree split 步骤。
+- 2026-11-21 18:32 定公开策略：5 仓先 private，验收后逐仓转 public。
 - 2026-11-21 18:20 补「去本机路径与环境指纹」清单（仓库内 2 文件 + 机器规格 13 处 + 外部配置 6 处）与「新会话交接」；确认邮箱改 noreply、指纹改通用值。
 - 2026-11-21 18:10 补安全关：密钥/隐私/EXIF 扫描结论、个人邮箱重写步骤、先私有后公开门禁；person-clouds 5 个私有空仓已建。
 
