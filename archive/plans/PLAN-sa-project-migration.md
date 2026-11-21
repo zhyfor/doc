@@ -1,5 +1,5 @@
 ---
-implementation_status: not_started
+implementation_status: done
 created_at: 2026-11-21 17:50:00
 updated_at: 2026-11-21 18:32:00
 ---
@@ -221,6 +221,7 @@ git -C /home/zh/www/workdir-rag push -u origin main
 
 ## 改动记录
 
+- 2026-11-21 完成：5 个项目迁出为独立仓（workdir-rag 97a7aa5、dsh-local-vision 6187e5a、free-ai-router 7db61ff、dsh-immersive-glass 2e1cccd、dsh-py-runtime 01ac190；dsh-local-vision 后续 d77942c 机器规格通用化）；rag-sources 并入 personalCloud；experience-review 并入 project-experience；SA 仓删源目录；repos.yaml 与三处 PROJECT_INDEX 已同步。
 - 2026-11-21 17:50 初稿：确定 9 项去向、落点规则写入 project-registry §8、5 个独立仓与 subtree split 步骤。
 - 2026-11-21 18:32 定公开策略：5 仓先 private，验收后逐仓转 public。
 - 2026-11-21 18:20 补「去本机路径与环境指纹」清单（仓库内 2 文件 + 机器规格 13 处 + 外部配置 6 处）与「新会话交接」；确认邮箱改 noreply、指纹改通用值。
