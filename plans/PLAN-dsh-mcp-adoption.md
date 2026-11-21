@@ -1,7 +1,7 @@
 ---
 implementation_status: in_progress
 created_at: 2026-11-21 05:25:00
-updated_at: 2026-11-21 11:41:00
+updated_at: 2026-11-21 12:45:00
 ---
 
 # PLAN：DSH MCP 采纳评估与 gitnexus / MySQL 只读接入
@@ -77,7 +77,7 @@ du -sh .gitnexus                    # 索引落在仓内 .gitnexus/，工具自�
 ```
 
 - `--index-only` 跳过 `AGENTS.md`/`CLAUDE.md` 写入与 skills/hooks 安装；本工作区 `AGENTS.md` 是治理入口，禁止被工具改写。
-- gitnexus 以 **git 根**为索引单位：传子目录会索引整个仓。`personalCloud/task/dsh-context-guard` 已空，误跑会索引整个 `personalCloud`（909 文件），需 `gitnexus clean --force` 回收。
+- gitnexus 以 **git 根**为索引单位：传子目录会索引整个仓。`dsh-context-guard` 真实仓库在 `/home/zh/www/dsh-context-guard`（`PROJECT_INDEX.md`、`repos.yaml` 均已登记）；`personalCloud/task/dsh-context-guard` 是拆分后残留的空目录，误跑会索引整个 `personalCloud`（909 文件），需 `gitnexus clean --force` 回收。
 - 记录首次耗时、索引体积、语言支持与证据缺口（写进 S5 报告）；`git status --short` 非空 → `gitnexus clean` 排查，确需固定忽略规则再用仓内 `.gitnexusrc` 并随仓提交。
 
 ## S4 注册 MCP（默认停用）
@@ -192,9 +192,9 @@ mysql --defaults-file=$HOME/.my.cnf <db> -e "CREATE TABLE _t(i int);"
 ```bash
 cp -a ~/.dsh/cordis.patch.yml.bak.<时间戳> ~/.dsh/cordis.patch.yml
 systemctl --user restart dsh-web
-cd /home/zh/www/personalCloud/task/dsh-context-guard && gitnexus clean
+cd /home/zh/www/dsh-context-guard && gitnexus clean --force   # 索引在仓内 .gitnexus/
 npm rm -g gitnexus
-rm -rf /home/zh/.gitnexus
+rm -rf /home/zh/.gitnexus                                      # 仅注册表
 git -C /home/zh/www/doc revert <commit>
 git -C /home/zh/www/personalCloud revert <commit>
 ```
@@ -218,3 +218,4 @@ MySQL 回滚：`sudo mysql -e "DROP USER 'dsh_ro'@'127.0.0.1';"`，删除 `~/.my
 - 2026-11-21 06:10 按确认补全 S1–S6：步骤产出/验收表、量化方法、风险表、开放项；明确本次全部实施、当前不开工。
 - 2026-11-21 06:30 更正量化来源：本机已无 `headroom-proxy`（单元/二进制均不存在、`dsh-web` 直连），改用 DSH 会话缓存 usage；同步清理 `mcp-control`、`services.conf` 的过期描述。
 - 2026-11-21 11:41 实施 S2–S5：实测 gitnexus 索引与 MCP 量化，补「实施结果」；S3 目标仓更正为已拆出的 `/home/zh/www/dsh-context-guard`，S6 待用户执行。
+- 2026-11-21 12:45 更正回滚段残留的旧路径（改为 `/home/zh/www/dsh-context-guard`），澄清索引在仓内 `.gitnexus/`、`~/.gitnexus` 仅注册表。
