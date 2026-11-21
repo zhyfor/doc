@@ -1,7 +1,7 @@
 ---
 implementation_status: not_started
 created_at: 2026-11-21 17:50:00
-updated_at: 2026-11-21 17:50:00
+updated_at: 2026-11-21 18:10:00
 ---
 
 # PLAN：SA 仓项目迁出与项目落点规范
@@ -60,6 +60,26 @@ www/
 
 判定顺序：先看运行物，再看是否被其他项目按路径引用，最后看是否长期演进；三者皆否 → task 或归档。提升为独立仓时沿用 §8 门禁（`SPEC.md`、`check.sh --repo`、`repos.yaml` 的 `spec:`）。
 
+## 安全关（发布前必过）
+
+源仓 `zhyfor/dshSuperagentRepo` 是**私有仓**，迁到 `person-clouds` 等于首次面对公开风险。已按「工作树 + 全历史」扫过，结论：
+
+| 检查项 | 结果 |
+|---|---|
+| 密钥/令牌（gh/sk-/AKIA/私钥/xox/AIza/凭据 URL） | 0 命中（唯一命中是 `scripts/check.sh` 自带的检测正则） |
+| `.env`/`.pem`/`.key`/`.sqlite`/`.db`/`.csv`/`.docx`/`.pdf` | 历史上从未提交 |
+| 手机号、身份证、真实邮箱 | 无；仅测试用 `test@example.com` |
+| 内网 IP、Tailscale 域名、连接串 | 0；`uv.lock` 的命中是 PyPI 地址误报 |
+| 图片 EXIF（GPS/机型/作者） | 无；29 张图都自造或生成，抽查 3 张无个人信息 |
+| 提交者邮箱 | **55 次提交用 `fenghoer@163.com`**，公开即暴露 |
+| 环境指纹 | 少量 `/home/zh/...`、`127.0.0.1:8766`、机器规格出现在 SPEC 与验收截图 |
+
+必做门禁：
+
+1. 阶段 2 第 3 步重写个人邮箱；推送前 `git log --format='%ae' | sort -u` 复核只剩 noreply。
+2. 仓先建 private；转 public 前逐仓确认「无凭据、无个人信息、无客户数据」并在台账留记录。
+3. 含内部路径/流程截图的目录（`experience-review/`）不随独立仓公开，只并入 `project-experience`。
+
 ## 实施步骤
 
 ### 阶段 0：基线
@@ -80,7 +100,9 @@ git -C /home/zh/www/dshSuperagentRepo status --short   # 必须为空
 
 ### 阶段 2：独立仓（5 个，同一套动作）
 
-每个仓重复以下 7 步（以 `workdir-rag` 为例）：
+5 个私有空仓已在 `person-clouds` 建好（2026-11-21）：`workdir-rag`、`dsh-local-vision`、`free-ai-router`、`dsh-immersive-glass`、`dsh-py-runtime`。**先私有跑通，再逐仓决定是否转公开。**
+
+每个仓重复以下 9 步（以 `workdir-rag` 为例）：
 
 ```bash
 # 1. 拆历史
@@ -88,13 +110,19 @@ git -C /home/zh/www/dshSuperagentRepo subtree split -P workdir-rag -b split/work
 # 2. 本地建仓并导入
 git init -b main /home/zh/www/workdir-rag
 git -C /home/zh/www/workdir-rag pull /home/zh/www/dshSuperagentRepo split/workdir-rag
-# 3. 建远程（需 person-clouds 建仓权限；无权限则先本地，remote 后补）
-gh repo create person-clouds/workdir-rag --public --source /home/zh/www/workdir-rag --push
-# 4. 补 SPEC.md（≤60 行：目标/用户/范围/非目标/接口/运行/验收/约束），README 首段一句话
-# 5. 迁移安装与引用路径（见下）
-# 6. 验证
+# 3. 重写提交邮箱（去掉个人邮箱 fenghoer@163.com）
+FILTER_BRANCH_SQUELCH_WARNING=1 git -C /home/zh/www/workdir-rag filter-branch --env-filter '
+GIT_AUTHOR_EMAIL=$(echo "$GIT_AUTHOR_EMAIL" | sed "s/^fenghoer@163\.com$/zhyfor@users.noreply.github.com/")
+GIT_COMMITTER_EMAIL=$(echo "$GIT_COMMITTER_EMAIL" | sed "s/^fenghoer@163\.com$/zhyfor@users.noreply.github.com/")' -- --all
+# 4. 关联远程并推送（仓为 private）
+git -C /home/zh/www/workdir-rag remote add origin https://github.com/person-clouds/workdir-rag.git
+git -C /home/zh/www/workdir-rag push -u origin main
+# 5. 补 SPEC.md（≤60 行：目标/用户/范围/非目标/接口/运行/验收/约束），README 首段一句话
+# 6. 迁移安装与引用路径（见下）
+# 7. 验证
 ./scripts/check.sh --repo workdir-rag ; go test ./...
-# 7. repos.yaml + 根 PROJECT_INDEX 登记，跑 ./scripts/repo-status.sh
+# 8. repos.yaml + 根 PROJECT_INDEX 登记，跑 ./scripts/repo-status.sh
+# 9. 安全复核通过后才 `gh repo edit --visibility public`（逐仓，不在本计划内自动做）
 ```
 
 各仓特有验证：
@@ -134,6 +162,7 @@ gh repo create person-clouds/workdir-rag --public --source /home/zh/www/workdir-
 ## 验收
 
 - 5 个新仓：`git log --follow` 能看到原提交；`check.sh --repo <name>` 通过；各自测试命令通过。
+- 安全：各仓 `git log --all --format='%ae' | sort -u` 不含 `fenghoer@163.com`；仓为 private，转公开有台账记录。
 - `repos.yaml` 与两处 `PROJECT_INDEX` 一致；`./scripts/repo-status.sh` 无缺失路径。
 - 功能：`dsh-rag` MCP 握手并完成一次检索；`dsh-vision` 可用；DSH 插件加载正常；`dsh-exp-review` 可启动。
 - 找代码：只从根 `PROJECT_INDEX.md` 出发，两跳内到任意项目的 `README.md`。
@@ -153,3 +182,4 @@ gh repo create person-clouds/workdir-rag --public --source /home/zh/www/workdir-
 ## 改动记录
 
 - 2026-11-21 17:50 初稿：确定 9 项去向、落点规则写入 project-registry §8、5 个独立仓与 subtree split 步骤。
+- 2026-11-21 18:10 补安全关：密钥/隐私/EXIF 扫描结论、个人邮箱重写步骤、先私有后公开门禁；person-clouds 5 个私有空仓已建。
