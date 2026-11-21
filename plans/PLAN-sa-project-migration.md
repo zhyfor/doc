@@ -1,7 +1,7 @@
 ---
 implementation_status: not_started
 created_at: 2026-11-21 17:50:00
-updated_at: 2026-11-21 18:10:00
+updated_at: 2026-11-21 18:20:00
 ---
 
 # PLAN：SA 仓项目迁出与项目落点规范
@@ -79,6 +79,33 @@ www/
 1. 阶段 2 第 3 步重写个人邮箱；推送前 `git log --format='%ae' | sort -u` 复核只剩 noreply。
 2. 仓先建 private；转 public 前逐仓确认「无凭据、无个人信息、无客户数据」并在台账留记录。
 3. 含内部路径/流程截图的目录（`experience-review/`）不随独立仓公开，只并入 `project-experience`。
+
+## 去本机路径与环境指纹
+
+原则：仓库内不出现本机绝对路径和机器规格；外部配置里的绝对路径集中在一处维护，迁移时逐项改完。
+
+**仓库内**（已扫，仅 2 个文件有绝对路径）：
+
+| 文件 | 现状 | 改法 |
+|---|---|---|
+| `workdir-rag/SPEC.md` | 1 处 `/home/zh/www/dshSuperagentRepo` | 改相对路径或 `$WORKSPACE` |
+| `task/dsh-immersive-glass/README.md` | 2 处 `/home/zh/www/...` | 改相对路径 + 相对的 DSH skill 路径 |
+
+机器规格 13 处（`dsh-local-vision` README 6、`RESOURCE-USAGE.md` 3、`make_fixtures.py` 1、fixtures manifest 2、`python/README.md` 1、`workdir-rag/docs/EVAL.md` 1）：把“48 GB / 16 核 / Ubuntu 24.04”改为“多核 CPU、≥16 GB 内存”这类通用描述；实测数据保留数字，但标注为“本机实测参考”。
+
+**外部配置**（迁移必须逐项改，已核实）：
+
+| 位置 | 引用 | 处理 |
+|---|---|---|
+| `~/.config/systemd/user/dsh-exp-watch.service` | `WorkingDirectory=`、`--project` 写死 `dshSuperagentRepo` | 改用 `%h/www/...` 写法并 reload |
+| `~/.dsh/profiles/web/package.json` | `dsh-immersive-glass` 的 `link:` | 指向 `/home/zh/www/dsh-immersive-glass`，重装 profile |
+| `~/.dsh/skills/{dsh-local-vision,free-ai-router,workdir-rag}` | 是复制目录，不是软链 | 从新仓重跑 `install.sh` 覆盖 |
+| `~/www/personalCloud/services.conf` | 只有 `dsh-ml` 服务名，无路径 | 不改；unit 名保持 `dsh-ml.service` |
+| `crontab` | 无迁移项目引用 | 不改 |
+| `~/.local/bin/{dsh-rag,dsh-vision,dsh-exp}` | 前两个无绝对路径，`dsh-exp` 指向 `project-experience` | 前两个重装即刷新；`dsh-exp` 不动 |
+| `free-ai-router/catalog.json` | 2 处本仓子目录 GitHub 链接 | 改为 `person-clouds/free-ai-router` |
+
+脚本一律改为按自身位置推导（`cd "$(dirname "$0")/.."`），不写 `/home/zh/...`。
 
 ## 实施步骤
 
@@ -159,6 +186,18 @@ git -C /home/zh/www/workdir-rag push -u origin main
 2. 跑 `./scripts/check.sh --repo doc`、`--repo personalCloud`、`--repo dshSuperagentRepo`。
 3. 本计划移入 `doc/archive/plans/`，更新 `implementation_status: done`。
 
+## 新会话交接
+
+本计划自包含，新会话直接用，不必重跑调查。
+
+- 已完成：现状核实、落点规则（`project-registry.md` §8）、安全扫描、去路径清单、5 个私有空仓创建。
+- 未开始：源仓未做任何改动（`dshSuperagentRepo` 工作树干净）；只改了 `doc` 仓的计划与规范。
+- 从「阶段 0」顺序推进；阶段 2 按 `workdir-rag` → `dsh-local-vision` → `free-ai-router` → `dsh-immersive-glass` → `dsh-py-runtime` 逐个做，每仓做完即验证、即推送，不攒着。
+- 5 个远程（private，空仓）：
+  `https://github.com/person-clouds/{workdir-rag,dsh-local-vision,free-ai-router,dsh-immersive-glass,dsh-py-runtime}.git`
+- 唯一待用户决策：独立仓最终是否转 public（逐仓判断，默认保持 private）。
+- 全部做完后：`implementation_status` 改 `done`，计划移入 `doc/archive/plans/`。
+
 ## 验收
 
 - 5 个新仓：`git log --follow` 能看到原提交；`check.sh --repo <name>` 通过；各自测试命令通过。
@@ -182,4 +221,9 @@ git -C /home/zh/www/workdir-rag push -u origin main
 ## 改动记录
 
 - 2026-11-21 17:50 初稿：确定 9 项去向、落点规则写入 project-registry §8、5 个独立仓与 subtree split 步骤。
+- 2026-11-21 18:20 补「去本机路径与环境指纹」清单（仓库内 2 文件 + 机器规格 13 处 + 外部配置 6 处）与「新会话交接」；确认邮箱改 noreply、指纹改通用值。
 - 2026-11-21 18:10 补安全关：密钥/隐私/EXIF 扫描结论、个人邮箱重写步骤、先私有后公开门禁；person-clouds 5 个私有空仓已建。
+
+## 篇幅说明
+
+超过 200 行的原因：本计划要能独立交给新会话执行，含 5 个仓的拆分命令、外部配置改动表和安全扫描结论。可压缩位置：危险区只在「现状」表与「实施步骤」的阶段 2 命令块，其余为决策依据与交接信息，压缩会丢失可执行性。
