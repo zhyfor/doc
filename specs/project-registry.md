@@ -81,9 +81,18 @@ done
 - `repo-status.sh` 发现缺失路径、dirty、分支异常、ahead/behind。
 - 索引只做导航；仓库细节以各仓 `README`/`STATUS` 为准；自检只发现漏登记和失效链接，不判断描述是否过期。
 
-## 8. `task/` 项目提升为独立仓
+## 8. 新建项目落点与提升为独立仓
 
-`personalCloud/task/<name>` 成熟到需要独立发布、独立 PR 或独立权限时，提升为 `/home/zh/www/<name>` 独立仓。
+新建或迁移项目先按判据定落点，不要默认塞进 `personalCloud/task/`：
+
+| 判据（满足任一） | 落点 |
+|---|---|
+| 有独立运行物：systemd unit、MCP、DSH 插件、安装脚本、常驻服务 | `/home/zh/www/<name>` 独立仓 |
+| 需要独立发布、独立 PR/CI、独立权限或独立历史 | `/home/zh/www/<name>` 独立仓 |
+| 一次性任务、小工具、调研记录、少量脚本 | `personalCloud/task/<name>` |
+| 已完成，只留记录 | 各仓 `archive/` 或 `doc/work/` |
+
+判定顺序：先看运行物，再看是否被其他项目按路径引用，最后看是否长期演进。三者皆否 → task 或归档。`personalCloud/task/<name>` 成熟后再按提升门禁升为独立仓。
 
 **提升门禁**（缺一不可）：
 
