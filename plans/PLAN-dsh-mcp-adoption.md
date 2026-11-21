@@ -1,7 +1,7 @@
 ---
-implementation_status: not_started
+implementation_status: in_progress
 created_at: 2026-11-21 05:25:00
-updated_at: 2026-11-21 06:10:00
+updated_at: 2026-11-21 11:41:00
 ---
 
 # PLAN：DSH MCP 采纳评估与 gitnexus / MySQL 只读接入
@@ -50,7 +50,7 @@ updated_at: 2026-11-21 06:10:00
 |---|---|---|---|
 | S1 | 写本文与登记表 | 计划 + 表格 | 已完成（`doc` 044ea94 / `personalCloud` 0a8a17d） |
 | S2 | 全局装 gitnexus | 可执行 `gitnexus` | `gitnexus --version` 输出 1.6.x；`gitnexus doctor` 无致命项 |
-| S3 | 单仓索引 | `~/.gitnexus` 内索引 | `gitnexus list` 见该仓；目标仓 `git status --short` 为空 |
+| S3 | 单仓索引 | 仓内 `.gitnexus/` 索引 | `gitnexus list` 见该仓；目标仓 `git status --short` 为空 |
 | S4 | 注册 MCP | 配置条目（停用） | `mcpctl.sh check` 通过；`mcpctl.sh list` 含 `gitnexus-mcp` |
 | S5 | 启用验证 + 量化 | 结论三选一 | 三个图问题答得上；记录工具数与 token 增量；恢复停用 |
 | S6 | MySQL 只读 | 账号 + `~/.my.cnf` | `mysql --defaults-file=... -e 'SHOW DATABASES;'` 成功；写操作被拒 |
@@ -68,17 +68,17 @@ gitnexus doctor
 ## S3 单仓索引
 
 ```bash
-cd /home/zh/www/personalCloud/task/dsh-context-guard
+cd /home/zh/www/dsh-context-guard   # 仓库已从 personalCloud/task/ 拆出（personalCloud a15cf6b）
 gitnexus analyze --index-only
 gitnexus status
 gitnexus list
 git status --short
-du -sh /home/zh/.gitnexus
+du -sh .gitnexus                    # 索引落在仓内 .gitnexus/，工具自动写入 .git/info/exclude
 ```
 
 - `--index-only` 跳过 `AGENTS.md`/`CLAUDE.md` 写入与 skills/hooks 安装；本工作区 `AGENTS.md` 是治理入口，禁止被工具改写。
-- 记录：首次耗时、索引体积、支持的语言/证据缺口，写入 S5 报告。
-- `git status --short` 非空 → `gitnexus clean`，查是否漏了 `--index-only`；确需固定忽略规则时再用仓内 `.gitnexusrc`，随仓提交。
+- gitnexus 以 **git 根**为索引单位：传子目录会索引整个仓。`personalCloud/task/dsh-context-guard` 已空，误跑会索引整个 `personalCloud`（909 文件），需 `gitnexus clean --force` 回收。
+- 记录首次耗时、索引体积、语言支持与证据缺口（写进 S5 报告）；`git status --short` 非空 → `gitnexus clean` 排查，确需固定忽略规则再用仓内 `.gitnexusrc` 并随仓提交。
 
 ## S4 注册 MCP（默认停用）
 
@@ -112,13 +112,27 @@ systemctl --user restart dsh-web
 
 ## S5 启用验证与量化
 
-1. mcpctl 或 GUI 打开 `gitnexus-mcp`，**新开临时会话**（不拿交付会话试）。
-2. 问三类只有图能答的问题：谁调用某函数、改某模块影响哪些入口、两符号间路径。
-3. 量化：工具数（19）；开 MCP 前后各开一个**新会话**、发同一条消息，对比首个请求的 usage：
+1. mcpctl 或 GUI 打开 `gitnexus-mcp`，新开临时会话（不拿交付会话试），问三类只有图能答的问题：谁调用某函数、改某模块影响哪些入口、两符号间路径；验完归档会话、不留后台进程。
+2. 量化：工具数（实测 17）；开 MCP 前后各开一个**新会话**、发同一条消息，对比首个请求的 usage：
    `jq '.record.rows.tokenMeasurement.val.anchor.usage' ~/.dsh/storages/session_projcache/sessions/<id>.json`
    （无 `jq` 用 `python3 -c` 读同字段；`inputTokens + cacheReadTokens` 即 prompt 大小），再看回答是否优于 grep / `workdir-rag`。
-4. 结论三选一：常开 / 默认停 / 移除；写回 `mcp-control` 后恢复 `disabled: true`（除非选常开）。
-5. 临时会话验完即归档，不留后台进程。
+3. 结论三选一：常开 / 默认停 / 移除；写回 `mcp-control` 后恢复 `disabled: true`（除非选常开）。
+
+## 实施结果（2026-11-21）
+
+| 步骤 | 结果 |
+|---|---|
+| S2 | `gitnexus@1.6.12` 装到 `/home/zh/.npm-global`；`doctor` 无致命项；FTS/VECTOR 扩展离线不可用（`GITNEXUS_LBUG_EXTENSION_INSTALL=auto` 可补），不影响图查询 |
+| S3 | `dsh-context-guard`：38 文件 / 1,126 节点 / 2,837 边 / 40 聚类 / 76 流程；首次 8.9s；索引 44 MB；`git status --short` 为空 |
+| S4 | `gitnexus-mcp` 已注册并 `disabled: true`；`dsh-config-check.py --deep` 通过（6 条既有 profile patch 告警与本次无关）；`mcpctl check` 因既有 `!!js` 标签报错，属旧问题 |
+| S5 | 17 个工具、schema 约 71 KB；新会话首个请求 15,523 → 32,335 tokens（+16.8k）；三类图问题答得上（impact/trace 带 uid、confidence、process）；结论**默认停** |
+| S6 | 待用户在宿主终端建账号与 `~/.my.cnf`（本机已确认客户端在位、3306 仅监听 127.0.0.1、`~/.my.cnf` 不存在） |
+
+S5 对比（同一问题、`dsh --profile headless`，无 MCP vs 临时 overlay 启用）：
+
+- 简单查调用点：两者都能答对；MCP 组首个请求 +16.8k tokens，最终 prompt 累计 48k → 98k，无收益。
+- 影响面 + 调用路径：MCP 组 21 次图查询、prompt 累计 475k；grep 组 11 次工具、303k。MCP 给出 `epistemic: exact`、uid、`no_path` 与流程归属，grep 需读源码自行拼推理。
+- 因此按构型问题按需开启；日常保持停用。
 
 ## S6 MySQL 只读（用户在宿主终端执行，计划不写密码）
 
@@ -161,7 +175,7 @@ mysql --defaults-file=$HOME/.my.cnf <db> -e "CREATE TABLE _t(i int);"
 | gitnexus 改写 `AGENTS.md`/hooks | 只用 `--index-only`；以 `git status --short` 为空作为门禁 |
 | MCP 常驻 token 税 | 默认 `disabled: true`；临时开启并设 `GITNEXUS_MCP_DEFAULT_MAX_TOKENS` |
 | 许可限制 | PolyForm NC，仅个人非商用；商用前重评 |
-| 索引体积/耗时 | 单仓起步，记录 `du -sh ~/.gitnexus`；再决定是否扩仓 |
+| 索引体积/耗时 | 单仓起步，记录 `du -sh <repo>/.gitnexus`；再决定是否扩仓 |
 | DB 凭据泄露 | 只读账号 + `~/.my.cnf` 600；不写文档、不进 git |
 | root 操作 | 建账号命令交用户在宿主终端执行 |
 
@@ -193,8 +207,14 @@ MySQL 回滚：`sudo mysql -e "DROP USER 'dsh_ro'@'127.0.0.1';"`，删除 `~/.my
 - 是否把 MySQL 查询沉淀成脚本或 skill。
 - ZipVoice 本地 TTS 的独立方案（无 GPU，需评估 CPU/ONNX 延迟）。
 
+## 篇幅说明
+
+- 原因：本计划留作交接证据，需保留可复制命令与实测数据。必须保留：S2–S6 命令块、实施结果表、回滚命令；可压缩位置：S4 YAML 详情、S5 对比段落。
+- 上限按 400 行执行。
+
 ## 改动记录
 
 - 2026-11-21 05:25 初稿：8 项评估结论、gitnexus 试点、MySQL 只读替代。
 - 2026-11-21 06:10 按确认补全 S1–S6：步骤产出/验收表、量化方法、风险表、开放项；明确本次全部实施、当前不开工。
 - 2026-11-21 06:30 更正量化来源：本机已无 `headroom-proxy`（单元/二进制均不存在、`dsh-web` 直连），改用 DSH 会话缓存 usage；同步清理 `mcp-control`、`services.conf` 的过期描述。
+- 2026-11-21 11:41 实施 S2–S5：实测 gitnexus 索引与 MCP 量化，补「实施结果」；S3 目标仓更正为已拆出的 `/home/zh/www/dsh-context-guard`，S6 待用户执行。
