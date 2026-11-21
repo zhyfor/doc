@@ -218,6 +218,7 @@ git -C /home/zh/www/workdir-rag push -u origin main
 - `dsh-superagent.service` 的 `WorkingDirectory=/home/zh/src/dsh-superagent` 已不存在，SA 当前未运行；本次只记录，后续单开任务修，登记到 `zhyfor/dshSuperagentRepo/issues`。
 - `dsh-superagent` 的 `feat/executor-budget-phase-end` 未合入 `main`，涉及 SA 时必须提醒，不自动合并。
 - `project-experience` 48 处 dirty、`personalCloud` 4 处 dirty 属既有状态，本任务不处理。
+- 2026-11-21 后续：上两条遗留已处理——`dsh-superagent.service` 路径改为 `/home/zh/www/dsh-superagent` 并启动（`127.0.0.1:3082`）；`feat/executor-budget-phase-end` 已确认并入 `main`（`1e45e47`），无需再提醒。
 
 ## 改动记录
 
