@@ -41,6 +41,20 @@ GitHub 的权限是“组织角色 + 仓库角色”两层叠加：
 - 新仓库、新 fork 由 zhyfor 创建，再按需邀请 super-YF。
 - super-YF 不给 Admin/Owner。
 
+### GitHub API 操作的凭证（Release / Issue / PR）
+
+- `git push` 与 `gh` 都使用 `zhyfor` 的 PAT；PAT 由本机 git credential helper 持有，不写进仓库、文档、脚本或提交信息。
+- `gh` 未登录时按需注入，只在该条命令的环境里传递，用完即弃：
+
+  ```bash
+  GH_TOKEN=$(git credential fill <<< $'protocol=https\nhost=github.com\n') gh release create v0.4.4 ...
+  ```
+
+- 禁止 `cat`/`echo` 凭据文件，禁止把 token 写进日志、提交说明或会话输出；核对身份只打印 `gh api user --jq .login`，核对结果只打印 URL 与状态码。
+- 不执行 `gh auth login --with-token`：它会把 PAT 复制一份到 `~/.config/gh/hosts.yml`，等于多一处明文副本。
+- `super-YF` 的凭证仍只走 `~/.config/gh-agent/`，两套凭证不混用。
+- 各仓的打包与发布步骤写在该仓 `PUBLISHING.md`，本节只约束凭证。
+
 ## 2. 分支与 PR
 
 - 默认分支：`master`；无 `master` 用 `main`。
