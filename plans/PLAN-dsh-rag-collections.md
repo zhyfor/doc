@@ -1,7 +1,7 @@
 ---
-implementation_status: blocked
+implementation_status: in_progress
 created_at: 2026-11-21 17:36:56
-updated_at: 2026-11-21 17:36:56
+updated_at: 2026-11-21 19:20:00
 ---
 
 # PLAN：dsh-rag 集合分层与按仓索引
@@ -113,8 +113,14 @@ updated_at: 2026-11-21 17:36:56
 - `search --all` 返回多仓结果并标出集合名/权重；`--kind doc` 只回文档；默认结果不含书。
 - `curl 127.0.0.1:8766/api/search?q=...` 返回 200 且能搜到书。
 - `sync-sources.py all` 的文档数与 `.sy` 数一致或逐条记录跳过原因；`books/` 无重复文件。
-- `dsh-rag --version` 为 0.8.0，README 里命令逐条可执行。
+- `dsh-rag --version` 为 0.9.0（格式 v3 属破坏性升级，版本号随之抬升），README 里命令逐条可执行。
 - `go test ./...`、`./scripts/check.sh --repo doc`、`--repo dshSuperagentRepo` 通过。
+
+## 待确认
+
+- 旧索引 `~/.local/share/dsh-workdir-rag/indexes/lab`（root 为 `~/.local/share/dsh-rag-sources` 的旧合集索引，10.3 万块）与
+  `d06d64461a0a93a2`（root 为 `/home/zh/www`）已不被任何集合使用，但仍在 `--all` 里拖慢检索（约 21 秒/次）。
+  建议改名成 `legacy-lab` / `legacy-www`（保留可回滚，需 `mv`）；删除会彻底失去旧索引。改名/删除都属破坏性操作，等确认后执行。
 
 ## 回滚
 
@@ -125,3 +131,9 @@ updated_at: 2026-11-21 17:36:56
 ## 改动记录
 
 - 2026-11-21 17:36 初稿：确定按仓索引、集合 kind/weight、经验库暂不索引、三个缺陷并入。
+- 2026-11-21 19:20 实施记录：格式 v3 + 集合字段落地，源码版本抬到 0.9.0（未沿用计划里的 0.8.0，因为 v3 索引旧二进制读不了）。
+  各仓索引已按 `--profile small` 建好；`siyuan`/`books` 在 `~/.local/share/dsh-rag-sources/*/.dsh-rag.json` 配 `note`/`book` + `m3`。
+  仓库根目录不提交 `.dsh-rag.json`（kind 按扩展名自动判定，向量档位用命令行显式传入），避免 17 个仓各加一个本机配置文件。
+  `xctl` 实际路径为 `personalCloud/task/xctl`（计划里写的 `/home/zh/www/xctl` 不存在），首轮批量索引该仓失败，已单独补建。
+  旧 `lab`（68M，10.3 万块）与 `d06d…`（28M，旧 www 大根）索引会让 `--all` 变慢，改名/清理需人工确认，见“待确认”。
+  另：MCP `search` 省略 `root` 时改为默认跨集合检索，避免继续指向 `/home/zh/www`。
