@@ -1,7 +1,7 @@
 ---
-implementation_status: in_progress
+implementation_status: done
 created_at: 2026-11-21 05:25:00
-updated_at: 2026-11-21 12:45:00
+updated_at: 2026-11-21 14:05:00
 ---
 
 # PLAN：DSH MCP 采纳评估与 gitnexus / MySQL 只读接入
@@ -126,7 +126,7 @@ systemctl --user restart dsh-web
 | S3 | `dsh-context-guard`：38 文件 / 1,126 节点 / 2,837 边 / 40 聚类 / 76 流程；首次 8.9s；索引 44 MB；`git status --short` 为空 |
 | S4 | `gitnexus-mcp` 已注册并 `disabled: true`；`dsh-config-check.py --deep` 通过（6 条既有 profile patch 告警与本次无关）；`mcpctl check` 因既有 `!!js` 标签报错，属旧问题 |
 | S5 | 17 个工具、schema 约 71 KB；新会话首个请求 15,523 → 32,335 tokens（+16.8k）；三类图问题答得上（impact/trace 带 uid、confidence、process）；结论**默认停** |
-| S6 | 待用户在宿主终端建账号与 `~/.my.cnf`（本机已确认客户端在位、3306 仅监听 127.0.0.1、`~/.my.cnf` 不存在） |
+| S6 | 用户已建 `dsh_ro@127.0.0.1`（`SELECT, SHOW VIEW`）与 `~/.my.cnf`（600）；实测可列 7 个库、样例查询 61 表；`CREATE TEMPORARY TABLE` 报 `1044 Access denied`，只读成立。授权范围是 `*.*`，比计划建议的按库更宽（详见 S6 说明） |
 
 S5 对比（同一问题、`dsh --profile headless`，无 MCP vs 临时 overlay 启用）：
 
@@ -134,33 +134,32 @@ S5 对比（同一问题、`dsh --profile headless`，无 MCP vs 临时 overlay 
 - 影响面 + 调用路径：MCP 组 21 次图查询、prompt 累计 475k；grep 组 11 次工具、303k。MCP 给出 `epistemic: exact`、uid、`no_path` 与流程归属，grep 需读源码自行拼推理。
 - 因此按构型问题按需开启；日常保持停用。
 
-## S6 MySQL 只读（用户在宿主终端执行，计划不写密码）
+## S6 MySQL 只读（已由用户在宿主终端执行，2026-11-21）
+
+实际执行结果：
 
 ```bash
-# 1) 建只读账号：只给需要的库，不给全局权限
-sudo mysql -e "CREATE USER 'dsh_ro'@'127.0.0.1' IDENTIFIED BY '<强密码>';
-GRANT SELECT, SHOW VIEW ON \`<db>\`.* TO 'dsh_ro'@'127.0.0.1';
-FLUSH PRIVILEGES;"
-
-# 2) 凭据文件 ~/.my.cnf，权限 600
-# [client]
-# host=127.0.0.1
-# user=dsh_ro
-# password=<强密码>
-# default-character-set=utf8mb4
-chmod 600 ~/.my.cnf
-
-# 3) 查询：--defaults-file 必须是第一个参数
-mysql --defaults-file=$HOME/.my.cnf -e "SHOW DATABASES;"
-mysql --defaults-file=$HOME/.my.cnf <db> -e "SELECT ... LIMIT 20;"
-
-# 4) 验证写操作被拒（预期报错）
-mysql --defaults-file=$HOME/.my.cnf <db> -e "CREATE TABLE _t(i int);"
+# 账号：dsh_ro@127.0.0.1，GRANT SELECT, SHOW VIEW ON *.*
+# 凭据：~/.my.cnf（600），不提交、不进文档
+mysql --defaults-file=$HOME/.my.cnf -e "SHOW DATABASES;"          # 7 个库
+mysql --defaults-file=$HOME/.my.cnf -e "SELECT COUNT(*) FROM information_schema.TABLES;"  # 61 表
+mysql --defaults-file=$HOME/.my.cnf <db> -e "CREATE TEMPORARY TABLE _p(i int);"  # 1044 拒绝
 ```
 
-- 先 `SHOW DATABASES;` 确认库清单，再决定授哪些库；不授 `*.*`。
+- 只读已成立：账号仅有 `SELECT, SHOW VIEW`，DDL/DML 全部报 `1044`。
+- **授权范围偏大**：计划原意是按库授权，实际给了 `*.*`。副作用是 `dsh_ro` 能读 `mysql.user`（含口令哈希）与所有业务库。建议收敛（需要时执行）：
+
+  ```sql
+  REVOKE SELECT, SHOW VIEW ON *.* FROM 'dsh_ro'@'127.0.0.1';
+  GRANT SELECT, SHOW VIEW ON `discovery`.* TO 'dsh_ro'@'127.0.0.1';
+  GRANT SELECT, SHOW VIEW ON `gf_scaffold`.* TO 'dsh_ro'@'127.0.0.1';
+  GRANT SELECT, SHOW VIEW ON `supercreater`.* TO 'dsh_ro'@'127.0.0.1';
+  FLUSH PRIVILEGES;
+  ```
+
+- `SHOW GRANTS` 里还有一条 `ON \`<db>\`.*`，是模板占位符残留（库名就叫 `<db>` 时才生效），收敛时可一并 `REVOKE ... ON \`<db>\`.*`。
 - 容器内库（如 `romm-db`）走 `docker exec -i romm-db mariadb ...`，不额外开端口。
-- `~/.my.cnf` 不提交、不写进文档、不进会话记录；密码由用户自填。结论：不装 `mysql-mcp-server`。
+- 结论：不装 `mysql-mcp-server`，用 `mysql` 客户端 + `~/.my.cnf` 直连。
 
 ## S7 收尾
 
@@ -219,3 +218,4 @@ MySQL 回滚：`sudo mysql -e "DROP USER 'dsh_ro'@'127.0.0.1';"`，删除 `~/.my
 - 2026-11-21 06:30 更正量化来源：本机已无 `headroom-proxy`（单元/二进制均不存在、`dsh-web` 直连），改用 DSH 会话缓存 usage；同步清理 `mcp-control`、`services.conf` 的过期描述。
 - 2026-11-21 11:41 实施 S2–S5：实测 gitnexus 索引与 MCP 量化，补「实施结果」；S3 目标仓更正为已拆出的 `/home/zh/www/dsh-context-guard`，S6 待用户执行。
 - 2026-11-21 12:45 更正回滚段残留的旧路径（改为 `/home/zh/www/dsh-context-guard`），澄清索引在仓内 `.gitnexus/`、`~/.gitnexus` 仅注册表。
+- 2026-11-21 14:05 S6 完成：`dsh_ro` 只读验证通过（DDL 报 1044），记录 `*.*` 授权偏宽与收敛建议；S1–S7 全部收尾，状态改 `done`。
