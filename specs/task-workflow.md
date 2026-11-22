@@ -114,4 +114,5 @@ test -w . && echo writable || echo READONLY
 ## 7. 收尾与上下文
 
 - 压缩或换会话后以磁盘文件、git 状态为准；同目标连续 10 步无新证据或同方案连续 2 次失败，写交接并停下；会话层级最多 2 层。
+- 改代码 / 配置 / 脚本 / 规则文件的任务，提交前按 `change-verify` 技能跑核验：先核对可判定项（测试真跑、门禁、运行进程是否加载了新代码、真实入口回放），再派 fresh subagent 只看 diff 找茬与反例攻击；问题清单交用户决定是否修，P0/P1 未解决不交付。
 - 收尾前更新 `PROJECT_INDEX.md`、`repos.yaml` 和目标仓文档；测试结束停服务、清端口和进程，报告资源回收依据；脚本化创建实施会话按 [`dsh-session-automation.md`](../reference/dsh-session-automation.md) 执行。
