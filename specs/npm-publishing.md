@@ -1,6 +1,6 @@
 # npm 包发布流程
 
-- 适用范围：`/home/zh/www` 下所有发布到 npm 的包（当前：`@fenghoer/dsh-context-guard`、`dsh-workflow-shortcuts`）。
+- 适用范围：`/home/zh/www` 下所有发布到 npm 的包（当前：`@fenghoer/dsh-context-guard`、`dsh-workflow-shortcuts`、`dsh-workbench-panel`）。新增 npm 包时先在本行登记，再按本文流程发布。
 - 相关：各仓 `PUBLISHING.md`（包内打包、Release 资产命名等专属细节）、[`github-collaboration.md`](github-collaboration.md) §1（GitHub 凭据）、[`task-workflow.md`](task-workflow.md)（授权与收尾）。
 - 本文是 npm 发布流程与三条本机特殊约束的唯一权威源；其他位置只链接。
 
