@@ -21,6 +21,7 @@
 - 状态枚举：`not_started | in_progress | fixing | blocked | done | rolled_back`。
 - 只写事实、硬约束、路由、可执行步骤和最小验收；背景、推导、过程日志放 `archive/`。
 - 行数超限默认 `WARN`；计划含 `## 篇幅说明` 且 ≤400 行时放行；断链、非法计划状态、缺计划元数据为 `FAIL`。完整规则见 [`specs/documentation-rules.md`](specs/documentation-rules.md)。
+- README / npm / 插件市场文案的硬规则见 [`specs/documentation-rules.md`](specs/documentation-rules.md) §6。
 
 ## 校验
 

@@ -20,7 +20,7 @@ scope: /home/zh/www
 | 非必读参考 | `doc/reference/` | 稳定但不必背诵的操作事实 |
 | 活跃计划 | 各仓 `plans/`、跨仓 `doc/plans/` | 一次性的实施计划 |
 | 历史资料 | `doc/archive/` | 已完成计划与复盘，不要求 AI 必读 |
-| 项目事实 | 各仓 `README.md` / `STATUS.md` / `SPEC.md` | 只属于该项目的状态和做法 |
+| 项目事实 | 各仓 `README.md`（定位与用法）/ `STATUS.md`（状态）/ `SPEC.md`（做法） | 只属于该项目的状态和做法 |
 
 - 一个主题只有一份主文档；其他位置只留链接，不复制正文。
 - 跨项目通用规则放共享规范；项目专属知识迁回对应仓库。
@@ -61,7 +61,45 @@ scope: /home/zh/www
 - AI 负责按检查报告修文档；用户不手工整改文档。
 - 输出文档、提交、报告时附本地链接：链接名用相对 `/home/zh/www` 的路径，地址用本机全路径。
 
-## 6. 检查约定
+## 6. README / npm / 插件市场文案
+
+### 6.1 硬规则
+
+1. 前 10 行讲清三件事：是什么、给谁用、关键差异。不从背景、愿景、技术栈开头。
+2. 紧跟「先说最要紧的 3–5 件事」，一条一句：能做什么、不能做什么、前提和风险；宁短勿全。
+3. 「完整功能」放后面，编号列表，一条一句；用法和教程外链 `docs/`。
+4. README 首句、npm description、market 文案用同一句定位，不各写一套。
+
+### 6.2 README 结构
+
+标题 + 一句话 → 先说最要紧的 3–5 件事 → 最短上手（可复制，≤15 行）→ 完整功能 → 边界与限制 → 去哪看（STATUS / docs / 市场页）。
+
+- 篇幅 ≤150 行；超出先删教程、流水账、重复安装说明，细节移 `docs/`。
+- 安装命令只出现一次；不写状态、实测日期、计划、环境安装记录，这些归 `STATUS.md`。
+- 中英双份只做等价翻译；有 `README.en.md` 就必须同步，不新增内容；没有不强制新建。
+- 语气：术语准确 + 句子口语化，用「你」；不用「赋能、一站式、生态、极致」。
+
+### 6.3 npm 说明
+
+- `package.json` 的 `description`：一句话，≤100 字符，写「给谁 + 干什么 + 关键差异」，功能最多点 3 个。
+- `keywords` 5–10 个，必含 `dsh-plugin`；同名包先核对 `npm view <pkg> repository` 指向本仓。
+- npm 页面正文就是 README，不另写一份；改 description 必须发版，发版后 `npm view <pkg> description` 复核。
+- 发布状态写 `STATUS.md`，不在 README / PUBLISHING 写死「尚未发布」。
+
+### 6.4 插件市场说明
+
+- `market/<owner>__<repo>.yml` 必备：`url`、`name`、`category`、`description.zh`、`description.en`；`tarball` 与 `icon` 至少一项。
+- description 一句，中文 ≤80 字、英文 ≤200 字符；写「做什么 + 2–3 个关键能力」，不写安装。
+- 中英同义同信息量，以中文为基准，不各删一半。
+- `category` 用市场已有枚举（当前见过 `ui`、`tools`、`workflow`），不造新词；新类别先确认。
+- 文案改动与 README、`package.json` 同一次提交，再走发布流程（`engineering-rules.md` §6）。
+
+### 6.5 检查
+
+- 新增或大改 README 时按 6.1–6.4 自查；`check.sh` 只查断链和行数（README 150 行 WARN），不判断重点是否清楚。
+- 现有超限 README 在下次改动时收敛，不单独开批量重写。
+
+## 7. 检查约定
 
 - `scripts/check.sh` 是唯一检查入口；`FAIL` 阻断：断链、非法计划状态、计划元数据或改动记录缺失。
 - 行数超限默认 `WARN`；计划含 `## 篇幅说明` 且 ≤400 行时不报 WARN；`--strict` 才返回失败。
