@@ -54,6 +54,62 @@ GitHub 的权限是“组织角色 + 仓库角色”两层叠加：
 - 不执行 `gh auth login --with-token`：它会把 PAT 复制一份到 `~/.config/gh/hosts.yml`，等于多一处明文副本。
 - `super-YF` 的凭证仍只走 `~/.config/gh-agent/`，两套凭证不混用。
 - 各仓的打包与发布步骤写在该仓 `PUBLISHING.md`，本节只约束凭证。
+- `GH_TOKEN` 已常驻在 `~/.zshrc`：交互式 zsh 直接可用；工具的 `bash -c` 不加载 zshrc，服务端脚本执行时按需 `set -a; . ~/.config/dsh-gh.env; set +a`（该文件 0600，由 zshrc 一次性生成，仍是单一份明文）。
+- 本机 git credential helper 为 `store`（`~/.git-credentials`），`git credential fill <<< 
+
+## 2. 分支与 PR
+
+- 默认分支：`master`；无 `master` 用 `main`。
+- 分支命名：dsh `dsh/<issue>-<slug>`；SA `sa/<issue>-<slug>`。
+- 活跃 GitHub 仓库的 `main` 必须走 PR；CI 通过后合并；审批人数 0，用 CI + 自检清单。
+- 禁止强推、删除受保护分支；历史有误用 `revert`，不改写。
+- PR 标签：`agent:dsh` / `agent:sa`；PR 描述写任务 issue、验证方式、回滚方式。
+- Gitee 个人仓库不强制 PR，由 zhyfor 直接推送。
+
+## 3. 改动来源标记
+
+- dsh 改动：不额外标记。
+- SA 改动：提交信息正文加一行 `由SA更改`；PR 描述和 issue 收尾也写。
+- 只写在提交说明/PR/issue，不在业务代码里散布标记。
+- 历史提交不改写；已有 SA 改动未标记的，在对应 issue 补说明。
+
+## 4. 规则集与权限（当前不启用）
+
+Ruleset 是可选的限制工具，用来规定谁能推、谁必须走 PR、必须过哪些 CI、能否强推或删除分支；**不设置 ruleset 仓库也能正常使用**。
+
+- 当前决定：先不启用 ruleset，靠约定、PR 模板、CI 和事后审查执行。
+- 已做过的实验性 ruleset 已删除；`zhyfor/dshSuperagentRepo` 为私有免费仓库，本身也不支持 ruleset。
+- 如未来要启用，再为仓库建 `main-protection`：要求 PR、禁止强推、禁止删除；需要时再加 required status checks。
+- 启用前保存现有 ruleset JSON，便于回滚。
+- GitHub Org：zhyfor Owner；super-YF 已接受邀请为 member，按仓库 Write。
+- 标签：`agent:dsh`、`agent:sa`、`needs-human`、`source:feishu`。
+
+## 5. 任务台账
+
+- 所有任务统一登记在 `zhyfor/dshSuperagentRepo/issues`。
+- 每个 issue 必填：目标仓库、平台（GitHub/Gitee）、分支、提交号/PR、验证结果、是否 SA 改动。
+- 跨仓库任务拆子任务，逐仓收尾。
+- Gitee 仓库的 SA 来源通过 issue 和提交信息追溯。
+
+## 6. 飞书话题转 Issue
+
+- 飞书话题是触发入口，不是自动任务库；默认不建 Issue。
+- 出现具体任务、方案初稿完成或用户输入 `/issue` 时，询问一次。
+- 菜单：
+  - 新话题：`1. 转 Issue`、`2. 仅聊天，不转`、`3. 稍后再说`
+  - 已有 Issue：`1. 追加到 #编号`、`2. 新建 Issue`、`3. 仅聊天`
+- 选择 1/2 后在 `zhyfor/dshSuperagentRepo` 建 Issue，正文写飞书话题链接、原始需求、方案、目标仓库/平台、验收、是否 SA 改动；标签 `source:feishu`、`agent:sa`，assignee 为 zhyfor。
+- 建完在飞书回链并记录 `话题 -> Issue` 映射；同一话题同一任务不重复建。
+- 选择“仅聊天”后本话题不再自动询问，直到 `/issue` 或出现新任务。
+- 转 Issue 前去掉 token、密码和隐私内容。
+
+## 7. 迁移与回滚
+
+- 迁移前执行 `git bundle create ... --all`，保存远程与本地 config。
+- `dsh-superagent` 远程：`upstream` 官方、`origin` zhyfor fork、`sa-fork` 旧 super-YF fork。
+- 旧 fork 在验收前不删除、不归档；确认无独有提交后再处理。
+- 回滚文档用 `git revert`；GitHub 设置用事先保存的 JSON 恢复。
+protocol=https\nhost=github.com\n'` 可取 `zhyfor` 的 PAT；`x-access-token` 那条只给 Actions 用，不能做 Release。
 
 ## 2. 分支与 PR
 

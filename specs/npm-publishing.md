@@ -63,6 +63,42 @@ npm view <pkg> versions --registry=https://registry.npmjs.org | tail -3
 - 5 分钟后仍查不到：先确认 publish 输出与 `whoami`，再查是否发到了别的 registry，不要直接重发同版本（会冲突）。
 - 可选安装验证：`dsh plugin --profile web add <pkg>`，再 `dsh plugin --profile web list` 看解析到新版本。
 
+## 5.5 插件市场条目（常驻事实，改描述只走这一步）
+
+以下是不常变的事实，本机实测于 2026-11-24；执行时直接照此操作，不要重新搜索定位：
+
+| 项 | 值 |
+|---|---|
+| 市场仓库 | `awesome-dsh-plugin/awesome-dsh-plugin`（默认分支 `main`） |
+| 条目路径 | `data/plugins/<owner>__<repo>.yml`；本工作区为 `data/plugins/person-clouds__dsh-context-guard.yml` |
+| 仓库内草稿 | `<repo>/market/person-clouds__<repo>.yml`，与市场条目逐字段对应 |
+| 推送权限 | zhyfor 只有 read（`permissions.push=false`），必须走 fork `zhyfor/awesome-dsh-plugin` |
+| 分支名 | `dsh/update-<owner>-<repo>-<version>`，PR 到 `main` |
+| 标签 | 该组织仓库没有 `agent:dsh`，`--label` 会失败；PR 正文写 `@zhyfor` |
+| tarball | 一律 `https://github.com/<owner>/<repo>/releases/latest/download/<repo>.tgz`（不带版本号） |
+
+改描述或 tarball 的流程（2026-11-24 实测可用）：
+
+```bash
+FORK=zhyfor/awesome-dsh-plugin
+REPO=awesome-dsh-plugin/awesome-dsh-plugin
+BRANCH=dsh/update-<owner>-<repo>-<version>
+set -a; . ~/.config/dsh-gh.env; set +a                 # GH_TOKEN，见 github-collaboration.md §1
+gh api -X POST repos/$REPO/forks --jq .full_name          # 首次才需要
+gh api -X POST repos/$FORK/merge-upstream -f branch=main  # fork 先同步上游
+BASE=$(gh api repos/$FORK/git/ref/heads/main --jq .object.sha)
+SHA=$(gh api repos/$REPO/contents/data/plugins/<owner>__<repo>.yml --jq .sha)
+gh api -X POST repos/$FORK/git/refs -f ref="refs/heads/$BRANCH" -f sha="$BASE"
+gh api -X PUT repos/$FORK/contents/data/plugins/<owner>__<repo>.yml \
+  -f message="docs(plugins): <owner>/<repo> 描述更新" \
+  -f content="$(base64 -w0 market/person-clouds__<repo>.yml)" -f sha="$SHA" -f branch="$BRANCH"
+gh pr create --repo $REPO --head zhyfor:$BRANCH --base main --title "..." --body "@zhyfor ..."
+```
+
+- 只改条目文件，不动 `url`/`name`/`category`；`tarball` 保持 `latest/download` 形式，发版不必改地址。
+- 新增收录：仓库公开、创建满 1 天、加 topic `dsh-plugin`、已发 npm 或 Release tarball，再按上面流程提交新条目。
+- 验证：`gh pr view <n> --repo $REPO --json additions,deletions,changedFiles` 应只有 1 个文件变更；合并后市场页随之更新。
+
 ## 6. tag 与 GitHub Release（发布确认之后）
 
 ```bash
