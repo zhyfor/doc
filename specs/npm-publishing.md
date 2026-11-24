@@ -70,12 +70,24 @@ npm view <pkg> versions --registry=https://registry.npmjs.org | tail -3
 | 项 | 值 |
 |---|---|
 | 市场仓库 | `awesome-dsh-plugin/awesome-dsh-plugin`（默认分支 `main`） |
-| 条目路径 | `data/plugins/<owner>__<repo>.yml`；本工作区为 `data/plugins/person-clouds__dsh-context-guard.yml` |
+| 条目路径 | 通用规则 `data/plugins/<owner>__<repo>.yml`；本工作区各插件见下表「本工作区条目清单」 |
 | 仓库内草稿 | `<repo>/market/person-clouds__<repo>.yml`，与市场条目逐字段对应 |
 | 推送权限 | zhyfor 只有 read（`permissions.push=false`），必须走 fork `zhyfor/awesome-dsh-plugin` |
 | 分支名 | `dsh/update-<owner>-<repo>-<version>`，PR 到 `main` |
 | 标签 | 该组织仓库没有 `agent:dsh`，`--label` 会失败；PR 正文写 `@zhyfor` |
 | tarball | 一律 `https://github.com/<owner>/<repo>/releases/latest/download/<repo>.tgz`（不带版本号） |
+
+本工作区条目清单（2026-11-24 核对 `data/plugins/` 全量索引）：
+
+| 插件仓 | 市场条目 `data/plugins/…` | 仓库内草稿 `market/…` | 状态 |
+|---|---|---|---|
+| `dsh-context-guard` | `person-clouds__dsh-context-guard.yml` | `person-clouds__dsh-context-guard.yml` | 已收录（描述更新 PR #18300） |
+| `dsh-workflow-shortcuts` | `person-clouds__dsh-workflow-shortcuts.yml` | `person-clouds__dsh-workflow-shortcuts.yml` | 已收录 |
+| `dsh-workbench-panel` | `person-clouds__dsh-workbench-panel.yml` | `person-clouds__dsh-workbench-panel.yml` | 已收录 |
+| `dsh-workbench` | `person-clouds__dsh-workbench.yml` | `person-clouds__dsh-workbench.yml` | 未收录（旧工作台已存档，不提交） |
+| `superagent-workbench` | `person-clouds__superagent-workbench.yml` | `person-clouds__superagent-workbench.yml` | 未收录（SA 内部工作台，按需再提） |
+
+新增插件时在「插件仓 / 条目 / 草稿」三列登记一行，再按下面的流程提交；`<owner>__<repo>.yml` 里的 `<owner>` 是 GitHub 所有者，与 npm scope 无关。
 
 改描述或 tarball 的流程（2026-11-24 实测可用）：
 
