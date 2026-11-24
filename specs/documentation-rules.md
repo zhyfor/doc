@@ -94,7 +94,7 @@ scope: /home/zh/www
 - description 一句，中文 ≤80 字、英文 ≤200 字符；写「做什么 + 2–3 个关键能力」，不写安装。
 - 中英同义同信息量，以中文为基准，不各删一半。
 - `category` 用市场已有枚举（当前见过 `ui`、`tools`、`workflow`），不造新词；新类别先确认。
-- 文案改动与 README、`package.json` 同一次提交，再走发布流程（`engineering-rules.md` §6）。
+- 文案改动与 README、`package.json` 同一次提交，再走发布流程（`engineering-rules.md` §10）。
 
 ### 6.5 检查
 

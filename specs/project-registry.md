@@ -50,7 +50,7 @@
 1. 从模板开始：`cp -r task/_template task/<小写-连字符名>`。
 2. 写 `README.md`，至少包含：一句话定位、状态、入口/端口、关键文件、常用命令、数据位置、依赖与回滚方式。
 3. 对外服务：在 `services.conf` 加一行（`名字|类型|目标|描述|端口`），跑 `./cloudctl list` 确认能识别；绑定地址只能是 `127.0.0.1` 或 Tailscale IP，禁止 `0.0.0.0`。
-4. 用到数据：按 [`engineering-rules.md`](engineering-rules.md) 第 8 节建独立 MySQL database + user。
+4. 用到数据：按 [`engineering-rules.md`](engineering-rules.md) 第 9 节建独立 MySQL database + user。
 5. 更新 `PROJECT_INDEX.md` 的目录/项目表与「最后核对」日期。
 6. 根仓库与独立仓库分别提交；提交信息沿用 `type(scope): 摘要`。
 
