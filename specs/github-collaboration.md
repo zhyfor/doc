@@ -112,18 +112,18 @@ Ruleset 是可选的限制工具，用来规定谁能推、谁必须走 PR、必
 
 ## 8. GitHub 访问代理（Clash）
 
-- 直接访问 GitHub 失败或超时（如 443 connect failed / timeout）时，不盲目重试直连；先验证本机 Clash mixed 代理端口，当前为 `127.0.0.1:<代理端口>`。本机代理端口与排障见工作区 [`personalCloud/doc/network-proxy.md`](../../personalCloud/doc/network-proxy.md)。
+- 直接访问 GitHub 失败或超时（如 443 connect failed / timeout）时，不盲目重试直连；先验证本机 Clash mixed 代理端口，**当前为 `127.0.0.1:7897`**（Clash Verge Rev 混合端口）。端口以 [`personalCloud/doc/network-proxy.md`](../../personalCloud/doc/network-proxy.md) 记录的实际监听为准。
 - 执行 GitHub 写操作前，先用当前命令级代理验证连通性，只打印状态码：
 
   ```bash
-  curl -sS --connect-timeout 5 --max-time 10 -x http://127.0.0.1:<代理端口> -o /dev/null -w '%{http_code}\n' https://github.com
+  curl -sS --connect-timeout 5 --max-time 10 -x http://127.0.0.1:7897 -o /dev/null -w '%{http_code}\n' https://github.com
   ```
 
 - `git`、`gh`、`curl` 等 GitHub 操作只在当前命令注入 `HTTPS_PROXY` 与 `HTTP_PROXY`，不修改全局 git 配置、不写入仓库：
 
   ```bash
-  HTTPS_PROXY=http://127.0.0.1:<代理端口> HTTP_PROXY=http://127.0.0.1:<代理端口> git push origin main
-  HTTPS_PROXY=http://127.0.0.1:<代理端口> HTTP_PROXY=http://127.0.0.1:<代理端口> gh repo view zhyfor/doc
+  HTTPS_PROXY=http://127.0.0.1:7897 HTTP_PROXY=http://127.0.0.1:7897 git push origin main
+  HTTPS_PROXY=http://127.0.0.1:7897 HTTP_PROXY=http://127.0.0.1:7897 gh repo view zhyfor/doc
   ```
 
 - 代理端口以 Clash 实际监听为准；端口变更时先按上面的 `curl -x` 验证 200，再执行 `push`、PR/Release/Issue 等写操作。
