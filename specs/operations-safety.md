@@ -10,7 +10,7 @@
 - 不在配置、文档、命令历史中硬编码密码、Token、私钥。
 - 不生成将 Web 服务暴露到公网（`0.0.0.0` + 路由器端口映射 / 云安全组放行 / Funnel）的配置。
 - 局域网内自用服务：用户 2026-11-21 明确要求「端口全放开」，compose 端口默认全接口映射
-  （`4399:4399`、`4400:80`，即 `0.0.0.0` 与 `::` 都监听），不再逐个绑 `127.0.0.1` / Tailscale IP。
+  （`<host-port>:<container-port>`，即 `0.0.0.0` 与 `::` 都监听），不再逐个绑 `127.0.0.1` / Tailscale IP。
   边界仍然是「内网」：不做端口映射、不开 Funnel、不加公网白名单；风险止步于容器内（无状态、
   无写接口的服务优先这样开）。
 - 远程访问默认只通过 Tailscale。允许 Tailscale Funnel 暴露必要服务，但必须满足第 2 节。
@@ -46,17 +46,13 @@ Funnel 会把服务发布到公网，必须同时满足：
 
 工具视图复核顺序：`id` → 命令跑在工具沙箱还是宿主 shell → 数字对不上换容器内/宿主视角 → 仍不可确认就输出可在宿主机执行的命令清单。工具内 `findmnt` 显示 `ro` + `test -w` 失败，不能推出宿主机只读，更不能建议 `sudo mount -o remount,rw`。
 
-DSH 场景先读会话头的 `permission/preset`、`sandbox/mode`、`approval/policy` 和 `header.cwd`。`workspace-write` 的写根是会话 cwd（`dsh-sandbox-policy` 的 `resolveWorkspaceRoot(session.header.cwd)`），父仓库 `.git`、`~/.dsh` 必然在界外。写 `~/.dsh` 配置被拒时不要 `cp`/`chmod`/remount，也不要把仓库复制到 `/tmp`；用 DSH `settings/update` API（见 [`dsh-session-automation.md`](../reference/dsh-session-automation.md)）或让用户在宿主终端执行。
+DSH 场景先读会话头的 `permission/preset`、`sandbox/mode`、`approval/policy` 和 `header.cwd`。`workspace-write` 的写根是会话 cwd（`dsh-sandbox-policy` 的 `resolveWorkspaceRoot(session.header.cwd)`），父仓库 `.git`、`~/.dsh` 必然在界外。写 `~/.dsh` 配置被拒时不要 `cp`/`chmod`/remount，也不要把仓库复制到 `/tmp`；用 DSH `settings/update` API（见 [`dsh-session-automation.md`](../../personalCloud/doc/dsh-session-automation.md)）或让用户在宿主终端执行。
 
 `ubuntuInit/12-verify.sh` 的降级基线：
 
 1. 补 PATH：`export PATH="${PATH}:/usr/sbin:/sbin"`。
 2. 抓 stderr 判权限，不把报错文本当结论。UFW 示例：`Status: active` → PASS；报 `be root|permission denied` → WARN；其余 → FAIL。
 3. WARN 是独立状态：退出码 `0` = 无 FAIL，`1` = 有 FAIL，`2` = `--strict` 且存在 WARN。需要 root 的项绝不输出 PASS。
-
-### 3.1 已确认的网络事实
-
-- mini 主机 `<主机名>` 的局域网地址 `<内网IP>` 已在路由器按 MAC（`<MAC>`）固定绑定，视同静态 IP；`ip addr` 的 `dynamic` 只是 DHCP 标志，不建议改静态地址或把“先固定 IP”列为前置条件。
 
 ## 4. 磁盘与文件操作预检
 

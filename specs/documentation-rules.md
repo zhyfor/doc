@@ -8,7 +8,7 @@ scope: /home/zh/www
 # 文档规范（spec）
 
 - 适用范围：`/home/zh/www` 下所有 Markdown 文档的新增、修改、合并、删除与检查。
-- 相关：[`AGENTS.md`](../../AGENTS.md)、[`PROJECT_INDEX.md`](../../PROJECT_INDEX.md)、[`task-workflow.md`](task-workflow.md)、[`PLAN-doc-slimming-and-tooling.md`](../archive/plans/PLAN-doc-slimming-and-tooling.md)
+- 相关：[`AGENTS.md`](../../AGENTS.md)、[`PROJECT_INDEX.md`](../../PROJECT_INDEX.md)、[`task-workflow.md`](task-workflow.md)、[`PLAN-doc-slimming-and-tooling.md`](../../personalCloud/plans/doc/archive/PLAN-doc-slimming-and-tooling.md)
 
 ## 1. 文档层级与唯一源
 
@@ -17,9 +17,9 @@ scope: /home/zh/www
 | AI 硬约束与路由 | `AGENTS.md` | 只写必须遵守的规则和去哪看 |
 | 工作区导航 | `PROJECT_INDEX.md` | 只做入口和仓库索引 |
 | 跨仓流程与硬约束 | `doc/specs/` | 任务流程、工程、运维、文档等长期规则 |
-| 非必读参考 | `doc/reference/` | 稳定但不必背诵的操作事实 |
-| 活跃计划 | 各仓 `plans/`、跨仓 `doc/plans/` | 一次性的实施计划 |
-| 历史资料 | `doc/archive/` | 已完成计划与复盘，不要求 AI 必读 |
+| 非必读参考 | 私有 `personalCloud/doc/` | 稳定但不必背诵的操作事实（含主机运行细节） |
+| 活跃计划 | 各仓 `plans/`、跨仓私有 `personalCloud/plans/doc/` | 一次性的实施计划 |
+| 历史资料 | 私有 `personalCloud/plans/doc/archive/` | 已完成计划与复盘，不要求 AI 必读 |
 | 项目事实 | 各仓 `README.md`（定位与用法）/ `STATUS.md`（状态）/ `SPEC.md`（做法） | 只属于该项目的状态和做法 |
 
 - 一个主题只有一份主文档；其他位置只留链接，不复制正文。
@@ -45,7 +45,7 @@ scope: /home/zh/www
 
 ## 4. 计划文档
 
-- 位置：单仓计划放 `<repo>/plans/PLAN-<主题>.md`，同仓文件名唯一，不用 `PLAN.md`；跨仓计划放 `doc/plans/PLAN-<主题>.md`。仓库根不再平铺计划文件。
+- 位置：单仓计划放 `<repo>/plans/PLAN-<主题>.md`，同仓文件名唯一，不用 `PLAN.md`；跨仓计划放 `personalCloud/plans/doc/PLAN-<主题>.md`。仓库根不再平铺计划文件。
 - 首行 H1 必须是 `# PLAN：<简短标题>`，使用全角冒号。
 - frontmatter 只保留：`implementation_status`、`created_at`、`updated_at`，时间格式 `Y-m-d H:i:s`。
 - 状态枚举：`not_started | in_progress | fixing | blocked | done | rolled_back`。
@@ -54,7 +54,7 @@ scope: /home/zh/www
 - 允许计划正文唯一一个固定小节 `## 核验记录`：字段为轮次 / 对象 / 命令 / 结论 / 遗留风险 / 状态 / 开销，≤8 行，只写结论不写过程流水。
 - 篇幅默认 ≤200 行；确需保留交接证据、命令清单等多行内容时，正文加 `## 篇幅说明` 写明原因、必须保留的段落和可压缩位置，上限放宽到 400 行。
 - 时间真实性：`created_at`、`updated_at` 和 `## 改动记录` 每条时间都必须等于实际修改时刻，禁止预填未来时间或事后补造；修订计划时同步更新 `updated_at`。
-- 计划完成后单仓移入 `<repo>/plans/archive/`、跨仓移入 `doc/archive/plans/`；活跃目录只留正在做或确实阻塞的计划。
+- 计划完成后单仓移入 `<repo>/plans/archive/`、跨仓移入 `personalCloud/plans/doc/archive/`；活跃目录只留正在做或确实阻塞的计划。
 
 ## 5. 生命周期与 AI 责任
 

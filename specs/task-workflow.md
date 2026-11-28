@@ -10,7 +10,7 @@
 ```
 
 - 讨论：只读代码、配置、git 状态，输出方案、边界、风险、待确认项。既定流程 bugfix 可顺手完成并同步 README/STATUS/PROJECT_INDEX（`/D` 除外）；新功能、新命令、新增运行时规则必须走计划 + 实施；复杂改动先出计划等确认。
-- 计划：单仓写 `<repo>/plans/PLAN-<主题>.md`，跨仓写 `doc/plans/PLAN-<主题>.md`（格式见 `documentation-rules.md` §4）；写完即停，下一步给用户 `/G <绝对路径>`。
+- 计划：单仓写 `<repo>/plans/PLAN-<主题>.md`，跨仓写 `personalCloud/plans/doc/PLAN-<主题>.md`（格式见 `documentation-rules.md` §4）；写完即停，下一步给用户 `/G <绝对路径>`。
 - 实施：只读计划与必要代码；编辑前确认目标仓和写权限；不重新开放式探索。
 
 硬约束：
@@ -87,7 +87,7 @@ test -w . && echo writable || echo READONLY
 - 先读 DSH 会话头：`permission/preset`、`sandbox/mode`、`approval/policy`、`header.cwd`；再看 `~/.dsh/profiles/*/cordis.patch.yml` 与 `@deepseek-ai/dsh-base/cordis.patch.yml`，最后查项目规则和业务代码。
 - `workspace-write` 下写根是会话 cwd；cwd 外（父仓 `.git`、`~/.dsh`、其他仓）只读是沙箱边界，不是宿主挂载，不能据此推断宿主机只读。
 - 搜索错误文本先缩小范围：只用 `rg` 查目标仓/目标包，排除 `*.jsonl*`、`*.zstd`、`sessions/`、`tool-output/`、`node_modules/`、`.git/`；不递归 grep `/home/zh`、`~/.dsh` 或整个工作区。
-- 写 DSH 配置优先走官方 `settings/update` API（见 [`dsh-session-automation.md`](../reference/dsh-session-automation.md)）；不从沙箱内直接改 `~/.dsh`，不复制仓库到 `/tmp`。
+- 写 DSH 配置优先走官方 `settings/update` API（见 [`dsh-session-automation.md`](../../personalCloud/doc/dsh-session-automation.md)）；不从沙箱内直接改 `~/.dsh`，不复制仓库到 `/tmp`。
 - 改配置、重启前先跑 `./scripts/dsh-config-check.py --deep`；失败不要重启。脚本内部调用一次 `dsh --dump-config` 属正常校验。
 - 整文件 `cat <<EOF` 写入易被 command-lint 拒绝；用补丁工具、`printf` 或 Python 有界写入。
 - 配置改动验证：新建临时会话读首三条事件确认，再 `workspace/archiveSession` 归档；不拿交付会话反复试。
@@ -106,7 +106,7 @@ test -w . && echo writable || echo READONLY
 
 - 压缩或换会话后以磁盘文件、git 状态为准；同目标连续 10 步无新证据或同方案连续 2 次失败，写交接并停下；会话层级最多 2 层。
 - 改代码、配置、脚本或运行时规则的任务，提交前由实施会话自检（测试、门禁、真实入口回放）；**不自动派发**核验——需要独立核验时由用户 `/V`（执行核验）或明确要求后，主会话再按 `change-verify` 技能派发：只核执行结果（行为与生效性），主会话只派发与收敛、一次改动只派 1 个核验会话、默认 1 轮、报告 ≤15 行、只核 diff + 验收命令 + 计划条目且禁全仓翻查；高风险改动在派单 prompt 显式写 `verify-again` 可加 1 个核验会话/1 轮，并须在提交说明写理由；核验态的工具调用与输出上限由 `dsh-context-guard` ≥ 0.5.0 按标题 `V：`/`TODO：V：` 强制执行（默认 25 提醒 / 40 硬拒 / 单轮 20000 字符），提示词与技能不重复数字；核验会话不修任何文件，P0/P1 停手上报，修复回实施会话；结论、遗留风险与开销写入任务计划的 `## 核验记录`；P0/P1 未解决不交付（用户明确放行的例外须记入报告）。纯文档与规范文本改动不做执行核验，由计划会话自查；需要独立复核时用 `/VP`（标题 `V：计划：…`，不写快照，可反复审），同样不自动触发。两个核验技能均由 `dsh-workflow-shortcuts` ≥ 0.4.0 内置注册，入口与硬拦需配套安装。
-- 收尾前更新 `PROJECT_INDEX.md`、`repos.yaml` 和目标仓文档；测试结束停服务、清端口和进程，报告资源回收依据；脚本化创建实施会话按 [`dsh-session-automation.md`](../reference/dsh-session-automation.md) 执行。
+- 收尾前更新 `PROJECT_INDEX.md`、`repos.yaml` 和目标仓文档；测试结束停服务、清端口和进程，报告资源回收依据；脚本化创建实施会话按 [`dsh-session-automation.md`](../../personalCloud/doc/dsh-session-automation.md) 执行。
 
 ### 7.1 度量（R1）
 
